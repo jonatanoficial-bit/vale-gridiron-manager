@@ -1,0 +1,12 @@
+# Matriz de testes - Lote 01
+
+| Área | Evidência atual | Comando |
+| --- | --- | --- |
+| Boot | Renderização do lobby e dos três modos | `pnpm test` |
+| Rotas | Carreira abre por CTA/hash | `pnpm test` |
+| Persistência base | Perfil do técnico é salvo em `localStorage` | `pnpm test` |
+| Tipagem e build | TypeScript strict e bundle Vite | `pnpm build` |
+| Qualidade estática | Lint do repositório | `pnpm lint` |
+| GitHub Pages | Workflow cria o artefato `dist` | GitHub Actions após o push |
+
+Os testes de motor, relógio, placar, simulação e transmissão 2D pertencem aos lotes posteriores e não são declarados como concluídos nesta entrega.

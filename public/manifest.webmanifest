@@ -1,0 +1,9 @@
+{
+  "name": "VALE GridIron Manager",
+  "short_name": "VGM",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#061427",
+  "theme_color": "#061427",
+  "description": "Fundação do manager de futebol americano VALE GridIron Manager."
+}
