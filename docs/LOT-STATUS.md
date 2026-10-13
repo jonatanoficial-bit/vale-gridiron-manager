@@ -30,3 +30,12 @@
 - RuleSets separados, marcos confirmados da UFL e relatório de cobertura por campo.
 - Escudos de NFL publicados pela própria liga e lineup de oito escudos UFL publicado por UFL on FOX, preservados sem alteração e registrados no manifesto de direitos.
 - Nenhum atleta, técnico, universidade, uniforme ou contrato foi criado para preencher lacunas.
+
+## Lote 03 — parcial, com evidência
+
+- Importador reproduzível em `tools/import-nfl-roster.mjs`, com URL, data, checksum e proteção contra IDs duplicados.
+- Snapshot `NFL_2026_2026-10-13`: 77 linhas publicadas no roster do Buffalo Bills, identificadas por fonte oficial da NFL.
+- Comissão técnica oficial do Buffalo Bills: Joe Brady, Pete Carmichael, Jim Leonhard e Jeff Rodgers.
+- O acordo de cinco anos de Joe Brady é registrado como parcial: a fonte não publica salário e o campo permanece nulo.
+- Nenhum retrato, uniforme, estádio, atributo de simulação ou contrato de atleta foi criado sem fonte e autorização por campo.
+- A cobertura continua `1/32` franquias NFL; UFL e NCAA permanecem pendentes de snapshots individuais.

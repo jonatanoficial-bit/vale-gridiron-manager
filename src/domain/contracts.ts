@@ -1,4 +1,4 @@
-export type Route = 'inicio' | 'carreira' | 'temporada' | 'jogoUnico' | 'banco' | 'configuracoes'
+export type Route = 'inicio' | 'carreira' | 'temporada' | 'elenco' | 'jogoUnico' | 'banco' | 'configuracoes'
 
 export type GameMode = 'career' | 'season' | 'game'
 

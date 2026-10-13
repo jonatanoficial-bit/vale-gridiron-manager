@@ -11,6 +11,15 @@ import {
   SOURCES_2026,
   UFL_2026_FRANCHISES,
 } from './data/catalog-2026'
+import {
+  BILLS_2026_ROSTER,
+  BILLS_2026_ROSTER_IMPORT,
+  BILLS_2026_STAFF,
+  BILLS_2026_STAFF_CONTRACTS,
+  LOTE_03_NFL_SNAPSHOT,
+  ROSTER_COVERAGE_2026,
+  positionGroups,
+} from './data/roster-2026'
 import type { CatalogSelection, CoachProfile, GameMode, Route } from './domain/contracts'
 import { loadCatalogSelection, loadCoachProfile, saveCatalogSelection, saveCoachProfile } from './lib/persistence'
 import './App.css'
@@ -19,6 +28,7 @@ const routes: Record<Route, string> = {
   inicio: '#/',
   carreira: '#/carreira',
   temporada: '#/temporada',
+  elenco: '#/elenco',
   jogoUnico: '#/jogo-unico',
   banco: '#/banco-de-dados',
   configuracoes: '#/configuracoes',
@@ -28,6 +38,7 @@ const routeLabels: Record<Route, string> = {
   inicio: 'Início',
   carreira: 'Carreira',
   temporada: 'Temporada',
+  elenco: 'Elenco',
   jogoUnico: 'Jogo único',
   banco: 'Banco de dados',
   configuracoes: 'Ajustes',
@@ -37,6 +48,7 @@ function getRouteFromHash(): Route {
   const hash = window.location.hash
   if (hash === '#/carreira') return 'carreira'
   if (hash === '#/temporada') return 'temporada'
+  if (hash === '#/elenco') return 'elenco'
   if (hash === '#/jogo-unico') return 'jogoUnico'
   if (hash === '#/banco-de-dados') return 'banco'
   if (hash === '#/configuracoes') return 'configuracoes'
@@ -91,13 +103,14 @@ function App() {
           <Career profile={profile} onChange={setProfile} onSave={persistProfile} onNavigate={handleNavigation} />
         )}
         {route === 'temporada' && <Sandbox selection={catalogSelection} onSave={persistCatalogSelection} onNavigate={handleNavigation} />}
+        {route === 'elenco' && <RosterDatabase />}
         {route === 'jogoUnico' && <SingleGame selectedFranchiseId={catalogSelection.franchiseId} />}
         {route === 'banco' && <ContentDatabase />}
         {route === 'configuracoes' && <Settings profile={profile} onChange={setProfile} onSave={persistProfile} />}
       </main>
 
       <footer className="app-footer">
-        <span>LOTES 01–02 · FUNDAÇÃO E CATÁLOGO</span>
+        <span>LOTES 01–03 · FUNDAÇÃO, CATÁLOGO E ELENCO</span>
         <span>VALE GRIDIRON MANAGER · protótipo independente</span>
         <span>{CONTENT_COVERAGE.catalogLabel}</span>
       </footer>
@@ -118,6 +131,7 @@ function TopBar({
     { route: 'inicio', icon: '⌂' },
     { route: 'carreira', icon: '♟' },
     { route: 'temporada', icon: '▦' },
+    { route: 'elenco', icon: '♙' },
     { route: 'jogoUnico', icon: '◉' },
     { route: 'banco', icon: '▤' },
   ]
@@ -125,9 +139,7 @@ function TopBar({
   return (
     <header className="topbar">
       <button className="brand-lockup" onClick={() => onNavigate('inicio')} aria-label="Ir para o início">
-        <span className="brand-overline">VALE</span>
-        <span className="brand-name">GRIDIRON</span>
-        <span className="brand-subtitle">MANAGER</span>
+        <img src="/brand/vale-gridiron-manager.png" alt="VALE GridIron Manager" />
       </button>
       <nav className="primary-nav" aria-label="Navegação principal">
         {primaryNav.map((item) => (
@@ -156,7 +168,7 @@ function Lobby({ onNavigate, coverageLabel }: { onNavigate: (route: Route) => vo
     <section className="lobby-page">
       <div className="hero-grid" aria-labelledby="lobby-title">
         <div className="hero-copy">
-          <p className="eyebrow"><span className="pulse-dot" /> TEMPORADA DE ESTREIA · LOTE 02</p>
+          <p className="eyebrow"><span className="pulse-dot" /> TEMPORADA DE ESTREIA · LOTE 03</p>
           <h1 id="lobby-title">CONSTRUA<br /><em>O SEU LEGADO.</em></h1>
           <p className="hero-lead">Uma fundação real para o manager de futebol americano: decisões, saves e modos de jogo começam aqui.</p>
           <div className="hero-actions">
@@ -171,7 +183,7 @@ function Lobby({ onNavigate, coverageLabel }: { onNavigate: (route: Route) => vo
         <div className="hero-visual" aria-hidden="true">
           <div className="stadium-lights light-left" />
           <div className="stadium-lights light-right" />
-          <div className="hero-crest"><span>VGM</span><small>EST. 2026</small></div>
+          <img className="hero-crest" src="/brand/vale-gridiron-manager.png" alt="" />
           <div className="field-lines" />
           <div className="hero-number">01</div>
         </div>
@@ -186,7 +198,7 @@ function Lobby({ onNavigate, coverageLabel }: { onNavigate: (route: Route) => vo
       <section className="foundation-grid" aria-label="Status da fundação">
         <FoundationPanel kicker="ROTAS" title="3 MODOS, 3 FLUXOS" value="ONLINE" description="Carreira, temporada sandbox e jogo único já possuem telas próprias e navegáveis." />
         <FoundationPanel kicker="SAVE LOCAL" title="PERFIL DO TÉCNICO" value="ATIVO" description="Rascunho persistente no navegador, pronto para evoluir para IndexedDB no Lote 11." />
-        <FoundationPanel kicker="DADOS" title="CATÁLOGO 2026" value="EM ANDAMENTO" description="NFL e UFL estruturadas por fonte; FBS/FCS e rosters aparecem com pendências reais." warn />
+        <FoundationPanel kicker="DADOS" title="ELENCO 2026" value="IMPORTANDO" description="O roster do Buffalo Bills foi auditado; os demais clubes preservam a pendência até sua própria fonte." warn />
       </section>
     </section>
   )
@@ -294,6 +306,107 @@ function ContentDatabase() {
 
 function Settings({ profile, onChange, onSave }: { profile: CoachProfile; onChange: (profile: CoachProfile) => void; onSave: () => void }) {
   return <section className="route-page" aria-labelledby="settings-title"><PageHeading eyebrow="AJUSTES" title="PREFERÊNCIAS LOCAIS" copy="As configurações abaixo pertencem ao protótipo do Lote 01 e ficam armazenadas apenas neste navegador." /><div className="settings-grid"><article className="panel"><p className="eyebrow">ACESSIBILIDADE</p><h2>EXPERIÊNCIA VISUAL</h2><label className="toggle-row"><span>Reduzir animações</span><input type="checkbox" checked={profile.reduceMotion} onChange={(event) => onChange({ ...profile, reduceMotion: event.target.checked })} /></label><p className="muted">A preferência será aplicada aos efeitos de transição quando a camada de movimento for adicionada.</p></article><article className="panel"><p className="eyebrow">PERSISTÊNCIA</p><h2>SAVE LOCAL</h2><p className="muted">O perfil usa localStorage neste lote. A migração para slots em IndexedDB está planejada para o Lote 11.</p><button className="action-button primary full" onClick={onSave}>SALVAR AGORA <span>✓</span></button></article></div></section>
+}
+
+function RosterDatabase() {
+  const [positionFilter, setPositionFilter] = useState('all')
+  const [statusFilter, setStatusFilter] = useState('all')
+  const coverage = ROSTER_COVERAGE_2026[0]
+  const sourceById = new Map(SOURCES_2026.map((source) => [source.id, source]))
+  const filteredPlayers = BILLS_2026_ROSTER.filter((player) => (positionFilter === 'all' || player.position === positionFilter) && (statusFilter === 'all' || player.rosterStatus === statusFilter))
+  const rosterStatuses = [...new Set(BILLS_2026_ROSTER.map((player) => player.rosterStatus))].sort()
+
+  function sourceLabel(sourceId: string) {
+    return sourceById.get(sourceId)?.label ?? sourceId
+  }
+
+  function sourceUrl(sourceId: string) {
+    return sourceById.get(sourceId)?.url ?? '#'
+  }
+
+  function heightLabel(heightIn: number) {
+    return `${Math.floor(heightIn / 12)}'${heightIn % 12}"`
+  }
+
+  return (
+    <section className="route-page roster-page" aria-labelledby="roster-title">
+      <PageHeading eyebrow="ELENCO · LOTE 03" title="DADOS REAIS, SEM ATALHOS" copy="O primeiro import auditável cobre o Buffalo Bills no snapshot de 13 OUT 2026. A tela não sugere completude: contratos de atletas, retratos, uniformes, estádio e ratings continuam pendentes até existir fonte e autorização por campo." />
+
+      <section className="roster-hero panel" aria-label="Resumo do snapshot importado">
+        <img className="roster-team-logo" src="/assets-real/nfl/buf.png" alt="Buffalo Bills — escudo publicado" />
+        <div>
+          <p className="eyebrow">SNAPSHOT IMPORTADO</p>
+          <h2>BUFFALO BILLS · NFL 2026</h2>
+          <p>{LOTE_03_NFL_SNAPSHOT.id} · fonte consultada em {LOTE_03_NFL_SNAPSHOT.sourceAsOfDate}</p>
+        </div>
+        <div className="roster-hero-stat"><strong>{BILLS_2026_ROSTER_IMPORT.rowCount}</strong><span>LINHAS DE ROSTER</span></div>
+        <div className="roster-hero-stat"><strong>{BILLS_2026_STAFF.length}</strong><span>CARGOS DE STAFF</span></div>
+        <a className="action-button secondary roster-source-link" href={BILLS_2026_ROSTER_IMPORT.sourceUrl} target="_blank" rel="noreferrer">FONTE NFL ↗</a>
+      </section>
+
+      <section className="roster-integrity-grid" aria-label="Integridade do import">
+        <article className="panel import-ledger">
+          <p className="eyebrow">RASTREABILIDADE</p>
+          <h2>IMPORTAÇÃO AUDITÁVEL</h2>
+          <dl>
+            <div><dt>Fonte</dt><dd><a href={BILLS_2026_ROSTER_IMPORT.sourceUrl} target="_blank" rel="noreferrer">{sourceLabel(BILLS_2026_ROSTER_IMPORT.sourceId)} ↗</a></dd></div>
+            <div><dt>Checksum da fonte</dt><dd className="checksum">{BILLS_2026_ROSTER_IMPORT.sourceChecksum}</dd></div>
+            <div><dt>Duplicatas</dt><dd>{BILLS_2026_ROSTER_IMPORT.duplicateCount} detectadas</dd></div>
+            <div><dt>Estado</dt><dd><span className="status-pill ready">IMPORTADO</span></dd></div>
+          </dl>
+          <p className="muted">{BILLS_2026_ROSTER_IMPORT.notes}</p>
+        </article>
+        <article className="panel import-coverage">
+          <p className="eyebrow">COBERTURA DO LOTE 03</p>
+          <h2>O QUE EXISTE AGORA</h2>
+          <div className="roster-metric-list">
+            <div><span>Franquias NFL com roster importado</span><strong>1/32</strong></div>
+            <div><span>Linhas de atletas do Bills</span><strong>{coverage.rosterRows}</strong></div>
+            <div><span>Contratos de atletas / perfis de simulação</span><strong>{coverage.athleteContracts} / {coverage.simulationProfiles}</strong></div>
+            <div><span>Retratos, uniformes e estádio</span><strong>{coverage.portraitAssets} / {coverage.uniformAssets} / {coverage.stadiumAssets}</strong></div>
+          </div>
+          <p className="muted">{coverage.notes}</p>
+        </article>
+      </section>
+
+      <section className="roster-table-panel panel" aria-labelledby="roster-table-title">
+        <div className="section-heading roster-section-heading">
+          <div><p className="eyebrow">ELENCO PUBLICADO</p><h2 id="roster-table-title">ROSTER DO BUFFALO BILLS</h2></div>
+          <div className="roster-filters">
+            <label>Posição<select aria-label="Filtrar por posição" value={positionFilter} onChange={(event) => setPositionFilter(event.target.value)}><option value="all">TODAS</option>{positionGroups().map((position) => <option key={position} value={position}>{position}</option>)}</select></label>
+            <label>Status<select aria-label="Filtrar por status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option value="all">TODOS</option>{rosterStatuses.map((status) => <option key={status} value={status}>{status}</option>)}</select></label>
+          </div>
+        </div>
+        <p className="table-summary" aria-live="polite">{filteredPlayers.length} de {BILLS_2026_ROSTER.length} linhas publicadas</p>
+        <div className="roster-table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>ATLETA</th><th>POS</th><th>STATUS</th><th>ALT</th><th>PESO</th><th>EXP</th><th>COLLEGE</th></tr></thead>
+            <tbody>{filteredPlayers.map((player) => <tr key={player.id}><td>{player.jerseyNumber ?? '—'}</td><td><a href={player.playerUrl} target="_blank" rel="noreferrer">{player.name}</a></td><td>{player.position}</td><td><span className="roster-code">{player.rosterStatus}</span></td><td>{heightLabel(player.heightIn)}</td><td>{player.weightLbs} lb</td><td>{player.experienceLabel}</td><td>{player.college ?? '—'}</td></tr>)}</tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="staff-contract-grid">
+        <article className="panel staff-panel">
+          <p className="eyebrow">COMISSÃO TÉCNICA PUBLICADA</p>
+          <h2>HEAD COACH E COORDENADORES</h2>
+          {BILLS_2026_STAFF.map((staff) => <div className="staff-row" key={staff.id}><div><strong>{staff.name}</strong><span>{staff.role}</span></div><a href={sourceUrl(staff.sourceId)} target="_blank" rel="noreferrer">FONTE ↗</a></div>)}
+          <p className="muted">Dados de identidade e cargo; retratos e contratos individuais seguem sem asset ou valor não publicado.</p>
+        </article>
+        <article className="panel contract-panel">
+          <p className="eyebrow">CONTRATO COM FONTE</p>
+          <h2>ACORDO DE JOE BRADY</h2>
+          {BILLS_2026_STAFF_CONTRACTS.map((contract) => <div className="contract-record" key={contract.id}><strong>{contract.durationYears} ANOS</strong><span>Head Coach · salário não divulgado</span><p>{contract.notes}</p><a href={sourceUrl(contract.sourceId)} target="_blank" rel="noreferrer">VER FONTE ↗</a></div>)}
+          <div className="pending-state compact-pending"><span>!</span><div><strong>Contratos de atletas pendentes</strong><p>O jogo não deduz salário, cap hit, bônus ou prazo quando a fonte não publica esses dados.</p></div></div>
+        </article>
+      </section>
+
+      <section className="roster-honesty panel">
+        <span>!</span>
+        <div><strong>Não há fotos, uniformes, estádio ou ratings simulados nesta tela.</strong><p>Esses campos exigem direitos, fornecedor e metodologia antes de entrar no produto. As 31 franquias NFL restantes, UFL e NCAA também continuam pendentes de importação individual.</p></div>
+      </section>
+    </section>
+  )
 }
 
 function PageHeading({ eyebrow, title, copy }: { eyebrow: string; title: string; copy: string }) { return <header className="page-heading"><p className="eyebrow">{eyebrow}</p><h1>{title}</h1><p>{copy}</p></header> }

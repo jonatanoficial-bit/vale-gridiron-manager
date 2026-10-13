@@ -27,6 +27,27 @@ export const SOURCES_2026: SourceReference[] = [
     sourceAsOfDate: CATALOG_CUTOFF,
   },
   {
+    id: 'nfl-roster-buffalo-2026',
+    label: 'NFL · roster 2026 do Buffalo Bills',
+    url: 'https://www.nfl.com/teams/buffalo-bills/roster',
+    scope: 'Roster publicado do Buffalo Bills, importado em snapshot separado do Lote 03.',
+    sourceAsOfDate: '2026-10-13',
+  },
+  {
+    id: 'bills-coaching-staff-2026',
+    label: 'Buffalo Bills · comissão técnica 2026',
+    url: 'https://www.buffalobills.com/team/coaches-roster/',
+    scope: 'Head coach e coordenadores publicados pelo clube para 2026.',
+    sourceAsOfDate: '2026-10-13',
+  },
+  {
+    id: 'bills-joe-brady-contract-2026',
+    label: 'Buffalo Bills · acordo de Joe Brady',
+    url: 'https://www.buffalobills.com/news/joe-brady-agrees-to-terms-to-be-the-next-buffalo-bills-head-coach',
+    scope: 'Duração publicada do acordo do head coach em 2026; salário não divulgado.',
+    sourceAsOfDate: '2026-10-13',
+  },
+  {
     id: 'nfl-schedule-2026',
     label: 'NFL · agenda regular',
     url: 'https://www.nfl.com/schedules?seasonType=REG',

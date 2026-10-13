@@ -74,3 +74,69 @@
 .catalog-filter:has(button:nth-child(3).is-selected) ~ .franchise-grid .franchise-row:nth-child(6) .franchise-mark, .catalog-filter:not(:has(button:nth-child(3).is-selected)) ~ .franchise-grid .franchise-row:nth-child(38) .franchise-mark { background-image: url('/assets-real/ufl/lineup-2026.jpg'); background-size: 126.93px 158.67px; background-position: -82.17px -75.37px; }
 .catalog-filter:has(button:nth-child(3).is-selected) ~ .franchise-grid .franchise-row:nth-child(7) .franchise-mark, .catalog-filter:not(:has(button:nth-child(3).is-selected)) ~ .franchise-grid .franchise-row:nth-child(39) .franchise-mark { background-image: url('/assets-real/ufl/lineup-2026.jpg'); background-size: 126.93px 158.67px; background-position: -26.13px -112.77px; }
 .catalog-filter:has(button:nth-child(3).is-selected) ~ .franchise-grid .franchise-row:nth-child(8) .franchise-mark, .catalog-filter:not(:has(button:nth-child(3).is-selected)) ~ .franchise-grid .franchise-row:nth-child(40) .franchise-mark { background-image: url('/assets-real/ufl/lineup-2026.jpg'); background-size: 126.93px 158.67px; background-position: -60.2px -112.77px; }
+
+/* Lote 03: roster real importado com cobertura e lacunas explícitas. */
+.roster-page { padding-bottom: 34px; }
+.roster-hero { display: grid; grid-template-columns: 78px minmax(0, 1fr) auto auto auto; align-items: center; gap: 18px; padding: 20px 24px; background: linear-gradient(105deg, rgba(8, 34, 60, .95), rgba(6, 20, 39, .95)); }
+.roster-team-logo { width: 68px; height: 68px; object-fit: contain; }
+.roster-hero h2 { margin: 3px 0 6px; color: #fff; font-family: var(--display); font-size: 1.35rem; }
+.roster-hero p:last-child { margin: 0; color: #a9bdd0; font-size: .72rem; }
+.roster-hero-stat { display: grid; justify-items: center; min-width: 88px; padding-left: 18px; border-left: 1px solid rgba(151, 184, 214, .28); }
+.roster-hero-stat strong { color: #f0bc54; font-family: var(--display); font-size: 2.1rem; line-height: 1; }
+.roster-hero-stat span { margin-top: 4px; color: #9cb2c8; font-family: var(--display); font-size: .53rem; letter-spacing: .05em; text-align: center; }
+.roster-source-link { min-height: 38px; padding-inline: 13px; font-size: .58rem; text-decoration: none; white-space: nowrap; }
+.roster-integrity-grid, .staff-contract-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+.import-ledger, .import-coverage, .staff-panel, .contract-panel { padding: 22px; }
+.import-ledger h2, .import-coverage h2, .staff-panel h2, .contract-panel h2 { margin: 4px 0 16px; color: #fff; font-family: var(--display); font-size: 1.16rem; }
+.import-ledger dl { margin: 0; }
+.import-ledger dl > div { display: grid; grid-template-columns: 138px minmax(0, 1fr); gap: 8px; padding: 9px 0; border-top: 1px solid rgba(151, 184, 214, .16); }
+.import-ledger dt { color: #8fa8c1; font-family: var(--display); font-size: .62rem; }
+.import-ledger dd { margin: 0; color: #e9f1f8; font-size: .71rem; overflow-wrap: anywhere; }
+.import-ledger a, .staff-row a, .contract-record a { color: #80c4ff; font-family: var(--display); font-size: .61rem; text-decoration: none; }
+.checksum { color: #b4c8db !important; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .62rem !important; }
+.roster-metric-list { display: grid; gap: 8px; }
+.roster-metric-list > div { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 9px 0; border-top: 1px solid rgba(151, 184, 214, .16); }
+.roster-metric-list span { color: #aec0d2; font-size: .74rem; }
+.roster-metric-list strong { color: #f0bc54; font-family: var(--display); font-size: .85rem; white-space: nowrap; }
+.import-ledger .muted, .import-coverage .muted, .staff-panel .muted { margin: 14px 0 0; color: #93abc2; font-size: .7rem; line-height: 1.45; }
+.roster-table-panel { margin-top: 16px; padding: 23px; }
+.roster-section-heading { align-items: end; }
+.roster-filters { display: flex; gap: 10px; }
+.roster-filters label { display: grid; gap: 4px; color: #8fa8c1; font-family: var(--display); font-size: .56rem; letter-spacing: .06em; }
+.roster-filters select { min-width: 105px; min-height: 34px; padding: 0 8px; border: 1px solid #547593; color: #f0f6fb; background: #07192d; font: inherit; font-size: .68rem; }
+.table-summary { margin: 14px 0 9px; color: #a4bacf; font-size: .7rem; }
+.roster-table-wrap { overflow-x: auto; border: 1px solid rgba(126, 157, 189, .25); }
+.roster-table-wrap table { width: 100%; min-width: 770px; border-collapse: collapse; }
+.roster-table-wrap th { padding: 10px; color: #8ea7c1; background: rgba(3, 17, 33, .84); font-family: var(--display); font-size: .58rem; letter-spacing: .08em; text-align: left; }
+.roster-table-wrap td { padding: 9px 10px; border-top: 1px solid rgba(126, 157, 189, .15); color: #c3d1df; font-size: .72rem; }
+.roster-table-wrap tbody tr:hover { background: rgba(22, 112, 187, .1); }
+.roster-table-wrap td:nth-child(1), .roster-table-wrap td:nth-child(3), .roster-table-wrap td:nth-child(4), .roster-table-wrap td:nth-child(5), .roster-table-wrap td:nth-child(6), .roster-table-wrap td:nth-child(7) { font-family: var(--display); font-size: .66rem; }
+.roster-table-wrap a { color: #f5f9fc; font-family: var(--display); text-decoration: none; }
+.roster-table-wrap a:hover { color: #80c4ff; text-decoration: underline; }
+.roster-code { display: inline-block; min-width: 29px; padding: 3px 4px; border: 1px solid #5f809d; color: #b9d5ee; background: #0b2744; font-size: .56rem; text-align: center; }
+.staff-row { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 11px 0; border-top: 1px solid rgba(151, 184, 214, .16); }
+.staff-row strong, .staff-row span { display: block; }
+.staff-row strong { color: #f2f6fb; font-family: var(--display); font-size: .78rem; }
+.staff-row span { margin-top: 3px; color: #9bb0c5; font-size: .68rem; }
+.contract-record { padding: 16px; border: 1px solid rgba(240, 188, 84, .42); background: linear-gradient(120deg, rgba(126, 82, 18, .18), rgba(6, 23, 42, .5)); }
+.contract-record strong, .contract-record span { display: block; }
+.contract-record strong { color: #f0bc54; font-family: var(--display); font-size: 1.6rem; }
+.contract-record span { margin-top: 4px; color: #e1ebf3; font-size: .76rem; }
+.contract-record p { margin: 10px 0; color: #adc0d1; font-size: .71rem; line-height: 1.45; }
+.compact-pending { margin-top: 16px; }
+.roster-honesty { display: flex; align-items: flex-start; gap: 14px; margin-top: 16px; padding: 18px 22px; border-left: 3px solid #f0bc54; }
+.roster-honesty > span { display: grid; place-items: center; flex: 0 0 auto; width: 28px; height: 28px; border: 1px solid #f0bc54; color: #f0bc54; font-family: var(--display); }
+.roster-honesty strong { color: #f1f6fb; font-family: var(--display); font-size: .82rem; }
+.roster-honesty p { margin: 5px 0 0; color: #aabfd1; font-size: .72rem; line-height: 1.45; }
+@media (max-width: 900px) { .roster-hero { grid-template-columns: 68px 1fr auto; }.roster-hero-stat:last-of-type { display: none; }.roster-source-link { grid-column: 2 / -1; justify-self: start; }.roster-integrity-grid, .staff-contract-grid { grid-template-columns: 1fr; } }
+@media (max-width: 680px) { .roster-hero { grid-template-columns: 58px 1fr; gap: 12px; padding: 17px; }.roster-team-logo { width: 54px; height: 54px; }.roster-hero h2 { font-size: 1.02rem; }.roster-hero-stat { display: none; }.roster-source-link { grid-column: 1 / -1; justify-self: stretch; }.roster-table-panel { padding: 16px; }.roster-section-heading { align-items: flex-start; }.roster-filters { width: 100%; }.roster-filters label { flex: 1; }.roster-filters select { width: 100%; min-width: 0; }.import-ledger dl > div { grid-template-columns: 1fr; gap: 4px; }.staff-row { align-items: flex-start; }.roster-honesty { padding: 16px; } }
+
+/* Imagens originais fornecidas pelo usuário: aplicadas sem qualquer alteração no arquivo. */
+.brand-lockup { display: grid; place-items: center; min-width: 92px; width: 116px; padding: 3px 7px; text-align: center; }
+.brand-lockup img { display: block; width: 100%; height: 68px; object-fit: contain; filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .45)); }
+.hero-visual { background: linear-gradient(110deg, rgba(3, 15, 30, .28), rgba(4, 18, 35, .52)), url('/media/campo-futebol-americano-referencia.png') center / cover; }
+.hero-visual::before { background: linear-gradient(90deg, rgba(218, 23, 58, .28), transparent 26%, transparent 76%, rgba(22, 112, 187, .24)); transform: none; }
+.hero-crest { display: block; width: clamp(150px, 19vw, 266px); height: auto; aspect-ratio: auto; background: none; clip-path: none; filter: drop-shadow(0 16px 26px rgba(0, 0, 0, .72)); }
+.field-preview { background: linear-gradient(90deg, rgba(5, 28, 32, .46), rgba(7, 53, 43, .3), rgba(5, 28, 32, .46)), url('/media/campo-futebol-americano-referencia.png') center / cover; }
+.field-preview::before { background: rgba(2, 13, 25, .08); }
+@media (max-width: 680px) { .brand-lockup { min-width: 58px; width: 64px; padding: 2px 4px; }.brand-lockup img { height: 56px; } }

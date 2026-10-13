@@ -1,9 +1,10 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { NFL_2026_FRANCHISES, RIGHTS_ASSET_MANIFEST_2026, RULESETS_2026, UFL_2026_FRANCHISES } from './data/catalog-2026'
+import { BILLS_2026_ROSTER, BILLS_2026_ROSTER_IMPORT, BILLS_2026_STAFF, BILLS_2026_STAFF_CONTRACTS } from './data/roster-2026'
 import App from './App'
 
-describe('Lotes 01 e 02', () => {
+describe('Lotes 01 a 03', () => {
   beforeEach(() => {
     window.location.hash = '#/'
     window.localStorage.clear()
@@ -15,6 +16,7 @@ describe('Lotes 01 e 02', () => {
 
   it('boots with the three game modes visible', () => {
     render(<App />)
+    expect(screen.getByRole('img', { name: /vale gridiron manager/i })).toHaveAttribute('src', '/brand/vale-gridiron-manager.png')
     expect(screen.getByRole('heading', { name: /construa/i })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /modo carreira/i })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /temporada sandbox/i })).toBeInTheDocument()
@@ -51,5 +53,23 @@ describe('Lotes 01 e 02', () => {
     window.location.hash = '#/jogo-unico'
     render(<App />)
     expect(screen.getByRole('img', { name: /buffalo bills.*escudo publicado/i })).toHaveAttribute('src', '/assets-real/nfl/buf.png')
+  })
+
+  it('keeps the Buffalo Bills import auditable and without invented contracts or ratings', () => {
+    expect(BILLS_2026_ROSTER).toHaveLength(77)
+    expect(BILLS_2026_ROSTER_IMPORT.rowCount).toBe(BILLS_2026_ROSTER.length)
+    expect(BILLS_2026_ROSTER_IMPORT.duplicateCount).toBe(0)
+    expect(new Set(BILLS_2026_ROSTER.map((player) => player.id)).size).toBe(BILLS_2026_ROSTER.length)
+    expect(BILLS_2026_ROSTER.find((player) => player.name === 'Josh Allen')).toMatchObject({ jerseyNumber: 17, position: 'QB', rosterStatus: 'ACT', contractStatus: 'pending', simulationAttributeStatus: 'pending' })
+    expect(BILLS_2026_STAFF).toHaveLength(4)
+    expect(BILLS_2026_STAFF_CONTRACTS).toEqual([expect.objectContaining({ staffId: 'nfl-2026-buffalo-bills-joe-brady', durationYears: 5, salary: null, contractStatus: 'partial' })])
+  })
+
+  it('opens the audited roster route with its official player link', () => {
+    window.location.hash = '#/elenco'
+    render(<App />)
+    expect(screen.getByRole('heading', { name: /dados reais, sem atalhos/i })).toBeInTheDocument()
+    expect(screen.getByText('77 de 77 linhas publicadas')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Josh Allen' })).toHaveAttribute('href', 'https://www.nfl.com/players/josh-allen/')
   })
 })

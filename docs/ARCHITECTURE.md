@@ -10,10 +10,10 @@ Esta base implementa o shell navegável para os três modos, contratos iniciais 
 - `src/domain/contracts.ts`: contratos tipados de perfil, cobertura e snapshots.
 - `src/data/content-status.ts`: estado explícito da cobertura de conteúdo real.
 - `src/lib/persistence.ts`: persistência transitória do perfil em `localStorage`.
-- `public/`: manifest, service worker simples e local reservado à marca oficial.
+- `public/`: manifest, service worker simples, emblema VALE e campo de referência fornecidos pelo usuário, preservados sem alterações.
 
 ## Decisões de base
 
-As rotas `#/carreira`, `#/temporada` e `#/jogo-unico` são independentes. A aplicação não contém elenco, equipe, técnico, calendário, logo de terceiros ou uniforme inventado. O catálogo real será incorporado por snapshots versionados no Lote 02.
+As rotas `#/carreira`, `#/temporada`, `#/elenco` e `#/jogo-unico` são independentes. A aplicação não contém elenco, equipe, técnico, calendário, logo de terceiros ou uniforme inventado. O catálogo real é incorporado por snapshots versionados; o primeiro roster auditável entrou no Lote 03.
 
 O navegador é o runtime principal. GitHub Pages hospeda somente a aplicação estática; não há promessa de Node ou Python no Pages.
