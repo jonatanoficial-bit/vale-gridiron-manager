@@ -1,6 +1,6 @@
 # VALE GridIron Manager
 
-Fundação técnica do Lote 01 para o manager de futebol americano VALE GridIron Manager.
+Fundação técnica dos Lotes 01 e 02 para o manager de futebol americano VALE GridIron Manager.
 
 ## O que está pronto
 
@@ -9,10 +9,13 @@ Fundação técnica do Lote 01 para o manager de futebol americano VALE GridIron
 - Contratos TypeScript e status explícito do catálogo real.
 - Testes de boot, rota e persistência.
 - Workflow de validação e deploy no GitHub Pages.
+- Inventário 2026 com snapshots explícitos de NFL, NCAA FBS/FCS e UFL.
+- 32 franquias NFL e 8 equipes UFL registradas por ID, fonte e data de corte.
+- RuleSets separados, relatório de cobertura por campo e seleção sandbox persistente.
 
 ## Conteúdo real
 
-Este lote não inclui equipes, atletas, técnicos, logos de terceiros, uniformes ou calendários fictícios. O inventário real e versionado é o escopo do Lote 02. Consulte [`docs/CONTENT-COVERAGE.md`](docs/CONTENT-COVERAGE.md).
+O Lote 02 registra apenas o que foi efetivamente obtido: a identificação estrutural de NFL e UFL, os snapshots 2026, fontes e marcos UFL. Os 32 escudos NFL e os oito escudos UFL foram adicionados sem alteração e constam do manifesto; rosters, técnicos, fixtures completos, FBS/FCS, contratos, fotos e uniformes continuam explicitamente pendentes. Nenhum nome é inventado para completar lacunas. Consulte [`docs/CONTENT-COVERAGE.md`](docs/CONTENT-COVERAGE.md), [`docs/LOT-02-SCOPE.md`](docs/LOT-02-SCOPE.md) e [`docs/rights/TEAM-LOGOS-2026.md`](docs/rights/TEAM-LOGOS-2026.md).
 
 O PNG oficial do emblema deve ser copiado sem modificação para `public/brand/` assim que o arquivo estiver disponível no checkout local. O sistema não o redesenha.
 

@@ -1,10 +1,12 @@
-# Matriz de testes - Lote 01
+# Matriz de testes - Lotes 01–02
 
 | Área | Evidência atual | Comando |
 | --- | --- | --- |
 | Boot | Renderização do lobby e dos três modos | `pnpm test` |
 | Rotas | Carreira abre por CTA/hash | `pnpm test` |
 | Persistência base | Perfil do técnico é salvo em `localStorage` | `pnpm test` |
+| Catálogo Lote 02 | NFL tem 32 IDs, UFL tem 8 e há quatro RuleSets separados | `pnpm test` |
+| Sandbox | Equipe real selecionada no catálogo é persistida localmente | `pnpm test` |
 | Tipagem e build | TypeScript strict e bundle Vite | `pnpm build` |
 | Qualidade estática | Lint do repositório | `pnpm lint` |
 | GitHub Pages | Workflow cria o artefato `dist` | GitHub Actions após o push |

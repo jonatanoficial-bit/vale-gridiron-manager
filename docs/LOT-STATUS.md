@@ -1,6 +1,6 @@
-# Status do Lote 01
+# Status dos lotes
 
-## Implementado
+## Lote 01 — concluído
 
 - Base Vite + React + TypeScript strict.
 - Design system de interface esportiva responsivo, inspirado na direção visual fornecida sem usar imagens como botões.
@@ -10,15 +10,23 @@
 - Manifesto web básico, workflow de validação e deploy para GitHub Pages.
 - Testes de boot, rota e persistência do perfil.
 
-## Simplificado
+### Simplificado
 
 - A persistência usa `localStorage` até a implementação de slots e migração em IndexedDB.
 - O service worker é uma fundação de cache simples; uma estratégia completa de offline será tratada no Lote 11.
 - O cabeçalho usa uma trava tipográfica temporária porque o PNG citado não está disponível no diretório local da tarefa.
 
-## Planejado / não implementado
+### Planejado / não implementado
 
-- Inventário factual de ligas, clubes, atletas, técnicos e calendários (Lote 02 e 03).
+- Inventário de atletas, técnicos, contratos, uniformes e mídia (Lote 03).
 - SimEngine, EventLog, regras de partida e estatísticas (Lote 04).
 - Campo e transmissão 2D (Lote 05).
 - Carreira, mercado, treino, finanças e sistemas profundos (Lotes 06 a 09).
+
+## Lote 02 — parcial, com evidência
+
+- Snapshots versionados de NFL, NCAA FBS, NCAA FCS e UFL com corte em `2026-10-11`.
+- 32 franquias NFL e 8 equipes UFL registradas por ID, fonte e status por campo.
+- RuleSets separados, marcos confirmados da UFL e relatório de cobertura por campo.
+- Escudos de NFL publicados pela própria liga e lineup de oito escudos UFL publicado por UFL on FOX, preservados sem alteração e registrados no manifesto de direitos.
+- Nenhum atleta, técnico, universidade, uniforme ou contrato foi criado para preencher lacunas.

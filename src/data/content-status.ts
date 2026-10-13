@@ -1,15 +1,16 @@
 import type { ContentCoverage } from '../domain/contracts'
 
 export const CONTENT_COVERAGE: ContentCoverage = {
-  catalogLabel: 'CATÁLOGO 2026 · ESTRUTURA INICIAL',
-  completedFields: 0,
-  totalFields: 5,
-  sourceMessage: 'Este repositório declara a estrutura de conteúdo, sem apresentar clubes, atletas, técnicos, logos ou calendários que ainda não tenham sido importados e verificados.',
+  catalogLabel: 'LOTE 02 · CATÁLOGO 2026 EM ANDAMENTO',
+  completedFields: 2,
+  totalFields: 4,
+  sourceMessage: 'NFL e UFL têm identificação estrutural registrada por snapshot. FBS/FCS, rosters, técnicos, fixtures completos e mídia permanecem explicitamente pendentes de importação e conferência por campo.',
   layers: [
-    { name: 'Estrutura de ligas e competições', status: 'pending', nextAction: 'Inventário factual no Lote 02' },
-    { name: 'Franquias, universidades e calendários', status: 'pending', nextAction: 'Importar por snapshot e fonte' },
+    { name: 'NFL · 32 franquias e divisões', status: 'ready', nextAction: 'Identificação por fonte e snapshot registrada' },
+    { name: 'UFL · 8 equipes e marcos 2026', status: 'partial', nextAction: 'Completar 43 fixtures e dados de staff' },
+    { name: 'NCAA FBS/FCS · universidades e conferências', status: 'pending', nextAction: 'Importar diretórios por temporada, sem criar instituições' },
+    { name: 'RuleSets separados por competição', status: 'partial', nextAction: 'Detalhar regulamentos versionados antes do motor' },
     { name: 'Elencos, técnicos e atributos de simulação', status: 'pending', nextAction: 'Catálogo real no Lote 03' },
     { name: 'Assets visuais e manifesto de direitos', status: 'pending', nextAction: 'Registrar ativos autorizados' },
-    { name: 'Contratos de dados versionados', status: 'ready', nextAction: 'Base criada neste Lote 01' },
   ],
 }
