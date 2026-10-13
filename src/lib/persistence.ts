@@ -5,6 +5,7 @@ const CATALOG_SELECTION_KEY = 'vale-gridiron-manager:catalog-selection:v1'
 
 const defaultProfile: CoachProfile = {
   name: '',
+  avatarId: 'sideline-command',
   nationality: 'Brasil',
   difficulty: 'Equilibrada',
   philosophy: 'Ataque equilibrado',

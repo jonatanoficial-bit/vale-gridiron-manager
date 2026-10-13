@@ -2,6 +2,8 @@ export type Route = 'inicio' | 'carreira' | 'temporada' | 'elenco' | 'jogoUnico'
 
 export type GameMode = 'career' | 'season' | 'game'
 
+export type CoachAvatarId = 'sideline-command' | 'rain-tactician' | 'facility-leader' | 'veteran-vision'
+
 export type ContentStatus = 'pending' | 'partial' | 'ready'
 
 export type ContentRightsStatus = 'cleared' | 'pending' | 'denied' | 'reference-only'
@@ -14,6 +16,7 @@ export interface ContentLayer {
 
 export interface CoachProfile {
   name: string
+  avatarId: CoachAvatarId
   nationality: string
   difficulty: 'Equilibrada' | 'Desafiadora' | 'Lenda'
   philosophy: 'Ataque equilibrado' | 'Defesa agressiva' | 'Controle de jogo'

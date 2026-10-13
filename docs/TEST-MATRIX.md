@@ -9,6 +9,7 @@
 | Sandbox | Equipe real selecionada no catálogo é persistida localmente | `pnpm test` |
 | Importação Lote 03 | Roster Buffalo Bills tem 77 IDs distintos, Josh Allen preserva os campos publicados e o contrato parcial de Joe Brady não inventa salário | `pnpm test` |
 | Rota de elenco | `#/elenco` mostra o snapshot e link oficial do atleta | `pnpm test` |
+| Avatar de carreira | Escolha de avatar cinematográfico fictício atualiza o perfil e é persistida no `localStorage` | `pnpm test` |
 | Tipagem e build | TypeScript strict e bundle Vite | `pnpm build` |
 | Qualidade estática | Lint do repositório | `pnpm lint` |
 | GitHub Pages | Workflow cria o artefato `dist` | GitHub Actions após o push |

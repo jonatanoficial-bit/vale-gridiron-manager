@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CONTENT_COVERAGE } from './data/content-status'
+import { COACH_AVATARS, findCoachAvatar } from './data/coach-avatars'
 import {
   CALENDAR_MILESTONES_2026,
   CAREER_SCENARIOS_2026,
@@ -220,12 +221,14 @@ function FoundationPanel({ kicker, title, value, description, warn = false }: { 
 }
 
 function Career({ profile, onChange, onSave, onNavigate }: { profile: CoachProfile; onChange: (profile: CoachProfile) => void; onSave: () => void; onNavigate: (route: Route) => void }) {
+  const selectedAvatar = findCoachAvatar(profile.avatarId)
+
   return (
     <section className="route-page" aria-labelledby="career-title">
       <PageHeading eyebrow="MODO CARREIRA" title="SUA JORNADA COMEÇA AQUI" copy="Defina o perfil do técnico. A trilha FCS → FBS → UFL → NFL está registrada, e vagas reais só serão abertas quando cada snapshot tiver staff e elenco validados." />
       <div className="career-layout">
         <article className="profile-card panel">
-          <div className="profile-avatar" aria-hidden="true">♟</div>
+          <div className="profile-avatar"><img src={selectedAvatar.path} alt={`Avatar fictício: ${selectedAvatar.label}`} /></div>
           <div><p className="eyebrow">PERFIL DO TÉCNICO</p><h2>{profile.name || 'Novo técnico'}</h2><span>Nível inicial · {profile.difficulty}</span></div>
           <div className="profile-progress"><span>PROGRESSO DA CARREIRA</span><div><i /></div><strong>0 XP</strong></div>
         </article>
@@ -237,6 +240,7 @@ function Career({ profile, onChange, onSave, onNavigate }: { profile: CoachProfi
             <label>Dificuldade<select value={profile.difficulty} onChange={(event) => onChange({ ...profile, difficulty: event.target.value as CoachProfile['difficulty'] })}><option>Equilibrada</option><option>Desafiadora</option><option>Lenda</option></select></label>
           </div>
           <label>Filosofia inicial<select value={profile.philosophy} onChange={(event) => onChange({ ...profile, philosophy: event.target.value as CoachProfile['philosophy'] })}><option>Ataque equilibrado</option><option>Defesa agressiva</option><option>Controle de jogo</option></select></label>
+          <fieldset className="avatar-picker"><legend>AVATAR CINEMATOGRÁFICO</legend><p>Retratos fictícios para o seu técnico. Não representam jogadores, técnicos ou pessoas reais.</p><div className="avatar-grid">{COACH_AVATARS.map((avatar) => <button type="button" key={avatar.id} className={`avatar-choice ${profile.avatarId === avatar.id ? 'is-selected' : ''}`} aria-pressed={profile.avatarId === avatar.id} onClick={() => onChange({ ...profile, avatarId: avatar.id })}><img src={avatar.path} alt="" /><span><strong>{avatar.label}</strong><small>{avatar.description}</small></span></button>)}</div></fieldset>
           <button className="action-button primary full" type="submit">SALVAR PERFIL <span>✓</span></button>
         </form>
         <aside className="career-sidebar panel">

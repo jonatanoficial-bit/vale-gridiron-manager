@@ -28,8 +28,11 @@ describe('Lotes 01 a 03', () => {
     fireEvent.click(screen.getByRole('button', { name: /começar carreira/i }))
     expect(screen.getByRole('heading', { name: /sua jornada começa aqui/i })).toBeInTheDocument()
     fireEvent.change(screen.getByLabelText(/nome do técnico/i), { target: { value: 'Alex' } })
+    fireEvent.click(screen.getByRole('button', { name: /tático sob pressão/i }))
     fireEvent.click(screen.getByRole('button', { name: /salvar perfil/i }))
     expect(window.localStorage.getItem('vale-gridiron-manager:coach-profile:v1')).toContain('Alex')
+    expect(window.localStorage.getItem('vale-gridiron-manager:coach-profile:v1')).toContain('rain-tactician')
+    expect(screen.getByRole('img', { name: /avatar fictício: tático sob pressão/i })).toHaveAttribute('src', '/avatars/coach-rain-tactician.png')
   })
 
   it('keeps the catalog factual: 32 NFL teams, 8 UFL teams and four separate rulesets', () => {

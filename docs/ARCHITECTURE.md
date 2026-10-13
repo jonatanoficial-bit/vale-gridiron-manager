@@ -10,7 +10,7 @@ Esta base implementa o shell navegável para os três modos, contratos iniciais 
 - `src/domain/contracts.ts`: contratos tipados de perfil, cobertura e snapshots.
 - `src/data/content-status.ts`: estado explícito da cobertura de conteúdo real.
 - `src/lib/persistence.ts`: persistência transitória do perfil em `localStorage`.
-- `public/`: manifest, service worker simples, emblema VALE e campo de referência fornecidos pelo usuário, preservados sem alterações.
+- `public/`: manifest, service worker simples, emblema VALE e campo de referência fornecidos pelo usuário, preservados sem alterações, e avatares originais de perfil em `public/avatars/`.
 
 ## Decisões de base
 

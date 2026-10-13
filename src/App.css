@@ -140,3 +140,19 @@
 .field-preview { background: linear-gradient(90deg, rgba(5, 28, 32, .46), rgba(7, 53, 43, .3), rgba(5, 28, 32, .46)), url('/media/campo-futebol-americano-referencia.png') center / cover; }
 .field-preview::before { background: rgba(2, 13, 25, .08); }
 @media (max-width: 680px) { .brand-lockup { min-width: 58px; width: 64px; padding: 2px 4px; }.brand-lockup img { height: 56px; } }
+
+/* Avatares originais para o perfil do usuário: não pertencem ao roster real. */
+.profile-avatar { overflow: hidden; background: #061427; }
+.profile-avatar img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+.avatar-picker { margin: 18px 0 0; padding: 0; border: 0; }
+.avatar-picker legend { color: #cbd8e5; font-family: var(--display); font-size: .67rem; font-weight: 800; letter-spacing: .07em; }
+.avatar-picker > p { margin: 7px 0 12px; color: #91a8c0; font-size: .7rem; line-height: 1.35; }
+.avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.avatar-choice { min-width: 0; overflow: hidden; padding: 0; border: 1px solid #355775; color: #dbe6ef; background: #07192d; cursor: pointer; text-align: left; transition: border-color .2s, transform .2s, box-shadow .2s; }
+.avatar-choice:hover { transform: translateY(-2px); border-color: #8eb0d0; }
+.avatar-choice.is-selected { border-color: #ff536b; box-shadow: 0 0 0 2px rgba(240, 40, 73, .3), 0 7px 18px rgba(0, 0, 0, .3); }
+.avatar-choice img { display: block; width: 100%; aspect-ratio: .72; object-fit: cover; object-position: center top; filter: saturate(.96) contrast(1.04); }
+.avatar-choice span { display: grid; gap: 3px; min-height: 55px; padding: 7px; }
+.avatar-choice strong { color: #f3f7fb; font-family: var(--display); font-size: .58rem; letter-spacing: .02em; line-height: 1.1; }
+.avatar-choice small { color: #91a9c0; font-size: .57rem; line-height: 1.15; }
+@media (max-width: 680px) { .avatar-grid { grid-template-columns: repeat(2, 1fr); }.avatar-choice strong { font-size: .64rem; }.avatar-choice small { font-size: .62rem; } }

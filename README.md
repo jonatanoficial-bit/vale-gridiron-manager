@@ -14,6 +14,7 @@ Fundação técnica dos Lotes 01 a 03 para o manager de futebol americano VALE G
 - RuleSets separados, relatório de cobertura por campo e seleção sandbox persistente.
 - Rota de elenco com o primeiro snapshot de roster auditável: Buffalo Bills, 77 linhas publicadas pela NFL em 13 de outubro de 2026.
 - Quatro cargos de comissão técnica do Buffalo Bills e o prazo publicado do acordo de Joe Brady, sem inventar salários, ratings, retratos ou contratos ausentes.
+- Quatro avatares cinematográficos originais e fictícios para o perfil do usuário, persistidos no modo Carreira e separados do banco de dados de pessoas reais.
 
 ## Conteúdo real
 
