@@ -1,4 +1,4 @@
-# Arquitetura do Lote 01
+# Arquitetura dos Lotes 01–05
 
 ## Objetivo desta entrega
 
@@ -6,7 +6,9 @@ Esta base implementa o shell navegável para os três modos, contratos iniciais 
 
 ## Organização
 
-- `src/App.tsx`: shell, navegação por hash e telas do Lote 01.
+- `src/App.tsx`: shell, navegação por hash, carreira, catálogo e telas de partida.
+- `src/sim/`: SimEngine puro, tipos, EventLog e projeção de estatísticas.
+- `src/broadcast/FieldCanvas.tsx`: Canvas tático que consome o estado do motor sem alterá-lo.
 - `src/domain/contracts.ts`: contratos tipados de perfil, cobertura e snapshots.
 - `src/data/content-status.ts`: estado explícito da cobertura de conteúdo real.
 - `src/lib/persistence.ts`: persistência transitória do perfil em `localStorage`.
@@ -14,6 +16,6 @@ Esta base implementa o shell navegável para os três modos, contratos iniciais 
 
 ## Decisões de base
 
-As rotas `#/carreira`, `#/temporada`, `#/elenco` e `#/jogo-unico` são independentes. A aplicação não contém elenco, equipe, técnico, calendário, logo de terceiros ou uniforme inventado. O catálogo real é incorporado por snapshots versionados; o primeiro roster auditável entrou no Lote 03.
+As rotas `#/carreira`, `#/temporada`, `#/elenco` e `#/jogo-unico` são independentes. A aplicação não contém elenco, equipe, técnico, calendário, logo de terceiros ou uniforme inventado. O catálogo real é incorporado por snapshots versionados; o primeiro roster auditável entrou no Lote 03. O motor dos Lotes 04–05 usa parâmetros neutros até que os campos individuais tenham fonte e direitos registrados.
 
 O navegador é o runtime principal. GitHub Pages hospeda somente a aplicação estática; não há promessa de Node ou Python no Pages.

@@ -383,7 +383,7 @@ export const CAREER_SCENARIOS_2026: CareerScenario[] = [
     label: 'Destino profissional · NFL',
     leagueId: 'nfl',
     status: 'partial',
-    requirement: 'Franquias e estrutura prontas; roster, staff e vagas serão importados no Lote 03.',
+    requirement: 'Franquias e estrutura prontas; roster, staff e vagas seguem parciais por snapshot.',
   },
 ]
 

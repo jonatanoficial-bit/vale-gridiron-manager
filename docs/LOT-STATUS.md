@@ -1,5 +1,19 @@
 # Status dos lotes
 
+## Lotes 04 e 05 — entregues como protótipo verificável
+
+- SimEngine determinístico com seed, posse, descida/distância, relógio, placar e EventLog em `src/sim/`.
+- Projeções de estatísticas derivadas do EventLog, sem atleta ou rating inventado.
+- Jogo Único executável com escolhas de passe curto, corrida, punt, field goal e simulação até o fim.
+- Campo 2D em Canvas com bola, linhas de scrimmage/primeira descida e 22 marcadores táticos neutros.
+- Correção do fluxo de Carreira: salvar agora apresenta confirmação no próprio formulário e CTA de continuidade.
+
+### Parcial / ainda pendente
+
+- Rulesets completos por liga, penalties, lesões, reviews, overtime, formações e escalas individuais.
+- Roster/ratings/uniformes autorizados para substituir os marcadores neutros.
+- O Lote 05 não declara transmissão final enquanto esses dados e direitos não forem integrados.
+
 ## Lote 01 — concluído
 
 - Base Vite + React + TypeScript strict.
@@ -19,8 +33,6 @@
 ### Planejado / não implementado
 
 - Inventário de atletas, técnicos, contratos, uniformes e mídia (Lote 03).
-- SimEngine, EventLog, regras de partida e estatísticas (Lote 04).
-- Campo e transmissão 2D (Lote 05).
 - Carreira, mercado, treino, finanças e sistemas profundos (Lotes 06 a 09).
 
 ## Lote 02 — parcial, com evidência

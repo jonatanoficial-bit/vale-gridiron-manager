@@ -1,6 +1,6 @@
 # VALE GridIron Manager
 
-Fundação técnica dos Lotes 01 a 03 para o manager de futebol americano VALE GridIron Manager.
+Fundação técnica dos Lotes 01 a 05 para o manager de futebol americano VALE GridIron Manager.
 
 ## O que está pronto
 
@@ -15,6 +15,9 @@ Fundação técnica dos Lotes 01 a 03 para o manager de futebol americano VALE G
 - Rota de elenco com o primeiro snapshot de roster auditável: Buffalo Bills, 77 linhas publicadas pela NFL em 13 de outubro de 2026.
 - Quatro cargos de comissão técnica do Buffalo Bills e o prazo publicado do acordo de Joe Brady, sem inventar salários, ratings, retratos ou contratos ausentes.
 - Quatro avatares cinematográficos originais e fictícios para o perfil do usuário, persistidos no modo Carreira e separados do banco de dados de pessoas reais.
+- SimEngine determinístico com seed, EventLog, placar, posse, descidas, relógio e projeção de estatísticas baseada somente nos eventos.
+- Partida 2D jogável em `#/jogo-unico`, com Canvas tático, play-by-play e marcadores neutros enquanto os rosters e uniforms oficiais não forem cobertos.
+- Confirmação explícita ao salvar o perfil de carreira, com caminho direto para a temporada.
 
 ## Conteúdo real
 

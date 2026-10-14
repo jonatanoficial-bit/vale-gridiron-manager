@@ -22,7 +22,7 @@ Esta entrega implementa uma primeira vertical verificável, e não declara o lot
 | UFL e NCAA | Pendente | Não houve snapshot individual validado neste lote parcial. |
 | Contratos de atletas e salários de staff | Pendente | Não foram publicados pela fonte usada; nenhum valor foi estimado. |
 | Retratos, uniformes, estádios e fotos | Pendente | Não foram adicionados sem arquivo e manifesto de direitos por asset. |
-| Atributos e ratings de simulação | Pendente | O modelo do Lote 04 ainda não existe; não há ratings arbitrários. |
+| Atributos e ratings de simulação | Pendente | O motor do Lote 04 existe somente com baseline neutro; não há ratings arbitrários ou atribuídos a atletas. |
 
 ## Fontes do snapshot
 

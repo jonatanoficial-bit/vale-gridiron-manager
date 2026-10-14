@@ -23,7 +23,7 @@ describe('Lotes 01 a 03', () => {
     expect(screen.getByRole('heading', { name: /jogo único/i })).toBeInTheDocument()
   })
 
-  it('opens the career route and persists a coach profile', () => {
+  it('opens the career route, persists a coach profile and confirms the next step', () => {
     render(<App />)
     fireEvent.click(screen.getByRole('button', { name: /começar carreira/i }))
     expect(screen.getByRole('heading', { name: /sua jornada começa aqui/i })).toBeInTheDocument()
@@ -33,6 +33,8 @@ describe('Lotes 01 a 03', () => {
     expect(window.localStorage.getItem('vale-gridiron-manager:coach-profile:v1')).toContain('Alex')
     expect(window.localStorage.getItem('vale-gridiron-manager:coach-profile:v1')).toContain('rain-tactician')
     expect(screen.getByRole('img', { name: /avatar fictício: tático sob pressão/i })).toHaveAttribute('src', '/avatars/coach-rain-tactician.png')
+    expect(screen.getByRole('status')).toHaveTextContent(/perfil salvo/i)
+    expect(screen.getByRole('button', { name: /continuar/i })).toBeInTheDocument()
   })
 
   it('keeps the catalog factual: 32 NFL teams, 8 UFL teams and four separate rulesets', () => {
@@ -56,6 +58,17 @@ describe('Lotes 01 a 03', () => {
     window.location.hash = '#/jogo-unico'
     render(<App />)
     expect(screen.getByRole('img', { name: /buffalo bills.*escudo publicado/i })).toHaveAttribute('src', '/assets-real/nfl/buf.png')
+  })
+
+  it('opens a deterministic 2D game from the single-game setup', () => {
+    window.location.hash = '#/jogo-unico'
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: /iniciar partida/i }))
+    expect(screen.getByRole('heading', { name: /jogo ao vivo/i })).toBeInTheDocument()
+    expect(screen.getByLabelText(/campo tático 2d/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /passe curto/i })).toBeEnabled()
+    fireEvent.click(screen.getByRole('button', { name: /passe curto/i }))
+    expect(screen.getByText(/play-by-play/i)).toBeInTheDocument()
   })
 
   it('keeps the Buffalo Bills import auditable and without invented contracts or ratings', () => {

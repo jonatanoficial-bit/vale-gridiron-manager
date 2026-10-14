@@ -1,6 +1,6 @@
 # Cobertura de conteúdo
 
-## Estado após o Lote 03
+## Estado após os Lotes 04–05
 
 | Camada | Estado | Regra |
 | --- | --- | --- |
@@ -14,6 +14,7 @@
 | Imagens e uniformes de terceiros | Pendente | Entram somente com asset registrado e autorizado. |
 | Emblema VALE GridIron Manager | Pronto | PNG original fornecido pelo usuário foi copiado sem alteração para `public/brand/vale-gridiron-manager.png` e aplicado ao cabeçalho e lobby. |
 | Campo de futebol americano de referência | Pronto para interface | PNG fornecido pelo usuário foi copiado sem alteração para `public/media/campo-futebol-americano-referencia.png`; é uma referência visual, não o estádio oficial de uma equipe. |
+| SimEngine e transmissão tática | Parcial | Há motor determinístico e campo 2D com marcadores neutros. Não existem ratings, escalações, uniformes ou representações individuais no cálculo ou no canvas. |
 
 ## Contrato de snapshot
 
