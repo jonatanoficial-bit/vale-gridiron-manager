@@ -4,7 +4,7 @@ import { NFL_2026_FRANCHISES, RIGHTS_ASSET_MANIFEST_2026, RULESETS_2026, UFL_202
 import { BILLS_2026_ROSTER, BILLS_2026_ROSTER_IMPORT, BILLS_2026_STAFF, BILLS_2026_STAFF_CONTRACTS } from './data/roster-2026'
 import App from './App'
 
-describe('Lotes 01 a 03', () => {
+describe('Lotes 01 a 06', () => {
   beforeEach(() => {
     window.location.hash = '#/'
     window.localStorage.clear()
@@ -35,6 +35,18 @@ describe('Lotes 01 a 03', () => {
     expect(screen.getByRole('img', { name: /avatar fictício: tático sob pressão/i })).toHaveAttribute('src', '/avatars/coach-rain-tactician.png')
     expect(screen.getByRole('status')).toHaveTextContent(/perfil salvo/i)
     expect(screen.getByRole('button', { name: /continuar/i })).toBeInTheDocument()
+  })
+
+  it('creates a user-coach dossier without inventing a real job or contract', () => {
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: /começar carreira/i }))
+    fireEvent.change(screen.getByLabelText(/nome do técnico/i), { target: { value: 'Alex' } })
+    fireEvent.click(screen.getByRole('button', { name: /iniciar dossiê/i }))
+    expect(screen.getByRole('heading', { name: /central da carreira/i })).toBeInTheDocument()
+    expect(screen.getByText(/0 vagas verificadas/i)).toBeInTheDocument()
+    expect(window.localStorage.getItem('vale-gridiron-manager:career-progress:v1')).toContain('user-coach-alex-v1')
+    fireEvent.click(screen.getByRole('button', { name: /registrar leitura/i }))
+    expect(screen.getByText('135')).toBeInTheDocument()
   })
 
   it('keeps the catalog factual: 32 NFL teams, 8 UFL teams and four separate rulesets', () => {

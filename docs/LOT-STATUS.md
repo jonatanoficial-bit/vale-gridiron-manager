@@ -1,5 +1,15 @@
 # Status dos lotes
 
+## Lote 06 — parcial, com save funcional
+
+- Dossiê local persistente para o técnico do usuário com XP, reputação, inbox e objetivos.
+- Uma partida tática finalizada registra a análise no desenvolvimento do usuário.
+- O painel de vagas informa a ausência de oportunidades verificadas; não cria propostas, contrato, salário ou clube fictício.
+
+### Pendente para o aceite completo
+
+- Vagas universitárias/NFL reais por temporada, entrevistas, propostas, contratos, demissões e mudanças de clube dependem de staff e mercado importados por snapshot.
+
 ## Lotes 04 e 05 — entregues como protótipo verificável
 
 - SimEngine determinístico com seed, posse, descida/distância, relógio, placar e EventLog em `src/sim/`.
@@ -33,7 +43,7 @@
 ### Planejado / não implementado
 
 - Inventário de atletas, técnicos, contratos, uniformes e mídia (Lote 03).
-- Carreira, mercado, treino, finanças e sistemas profundos (Lotes 06 a 09).
+- Mercado, treino, finanças e sistemas profundos (Lotes 07 a 09); a carreira segue parcial até receber vagas e contratos reais.
 
 ## Lote 02 — parcial, com evidência
 

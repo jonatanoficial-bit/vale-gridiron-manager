@@ -9,6 +9,7 @@ Esta base implementa o shell navegável para os três modos, contratos iniciais 
 - `src/App.tsx`: shell, navegação por hash, carreira, catálogo e telas de partida.
 - `src/sim/`: SimEngine puro, tipos, EventLog e projeção de estatísticas.
 - `src/broadcast/FieldCanvas.tsx`: Canvas tático que consome o estado do motor sem alterá-lo.
+- `src/career/progress.ts`: dossiê local do UserCoach, objetivos, XP, reputação e inbox.
 - `src/domain/contracts.ts`: contratos tipados de perfil, cobertura e snapshots.
 - `src/data/content-status.ts`: estado explícito da cobertura de conteúdo real.
 - `src/lib/persistence.ts`: persistência transitória do perfil em `localStorage`.

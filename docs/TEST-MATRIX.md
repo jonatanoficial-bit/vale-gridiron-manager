@@ -1,4 +1,4 @@
-# Matriz de testes - Lotes 01–05
+# Matriz de testes - Lotes 01–06
 
 | Área | Evidência atual | Comando |
 | --- | --- | --- |
@@ -13,6 +13,7 @@
 | Confirmação de carreira | Salvar perfil confirma o resultado no formulário e oferece continuidade | `pnpm test` |
 | SimEngine Lote 04 | Determinismo por seed, `snap` antes da ação, pontos apenas por eventos de pontuação e fim de partida | `pnpm test` |
 | Transmissão Lote 05 | Campo Canvas consome estado do motor; o App abre a partida e mostra EventLog/placar | `pnpm test` |
+| Carreira Lote 06 | Dossiê do usuário nasce sem clube/vaga inventada e objetivos só recompensam uma vez | `pnpm test` |
 | Tipagem e build | TypeScript strict e bundle Vite | `pnpm build` |
 | Qualidade estática | Lint do repositório | `pnpm lint` |
 | GitHub Pages | Workflow cria o artefato `dist` | GitHub Actions após o push |

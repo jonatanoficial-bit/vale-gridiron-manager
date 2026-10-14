@@ -144,3 +144,34 @@ export interface CareerSaveContract {
   contentSnapshotIds: string[]
   schemaVersion: number
 }
+
+export type CareerObjectiveState = 'active' | 'complete' | 'blocked'
+
+export interface CareerObjective {
+  id: 'profile-file' | 'catalog-review' | 'match-review'
+  label: string
+  detail: string
+  rewardXp: number
+  rewardReputation: number
+  state: CareerObjectiveState
+}
+
+export interface CareerInboxMessage {
+  id: string
+  category: 'system' | 'coverage' | 'career'
+  title: string
+  body: string
+  read: boolean
+}
+
+export interface CareerProgress {
+  id: string
+  schemaVersion: 1
+  userCoachId: string
+  currentClubId: null
+  createdAt: string
+  xp: number
+  reputation: number
+  objectives: CareerObjective[]
+  inbox: CareerInboxMessage[]
+}

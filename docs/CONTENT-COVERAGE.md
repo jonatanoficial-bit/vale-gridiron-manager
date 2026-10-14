@@ -1,6 +1,6 @@
 # Cobertura de conteúdo
 
-## Estado após os Lotes 04–05
+## Estado após o Lote 06
 
 | Camada | Estado | Regra |
 | --- | --- | --- |
@@ -15,6 +15,7 @@
 | Emblema VALE GridIron Manager | Pronto | PNG original fornecido pelo usuário foi copiado sem alteração para `public/brand/vale-gridiron-manager.png` e aplicado ao cabeçalho e lobby. |
 | Campo de futebol americano de referência | Pronto para interface | PNG fornecido pelo usuário foi copiado sem alteração para `public/media/campo-futebol-americano-referencia.png`; é uma referência visual, não o estádio oficial de uma equipe. |
 | SimEngine e transmissão tática | Parcial | Há motor determinístico e campo 2D com marcadores neutros. Não existem ratings, escalações, uniformes ou representações individuais no cálculo ou no canvas. |
+| Carreira do técnico do usuário | Parcial | Dossiê persistente, XP, reputação, objetivos e inbox funcionam localmente. Clube, oferta, entrevista, contrato e salário continuam nulos até uma vaga real ser importada. |
 
 ## Contrato de snapshot
 

@@ -11,7 +11,7 @@ export function FieldCanvas({ state }: { state: GameState }) {
 
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas) return
+    if (!canvas || typeof CanvasRenderingContext2D === 'undefined') return
     const rect = canvas.getBoundingClientRect()
     const pixelRatio = window.devicePixelRatio || 1
     const width = Math.max(360, Math.round(rect.width || 760))

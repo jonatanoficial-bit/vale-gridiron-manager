@@ -205,3 +205,44 @@
 .box-score > .action-button { margin-top: 14px; }
 @media (max-width: 900px) { .live-game-grid { grid-template-columns: 1fr; }.play-by-play ol { max-height: 260px; }.live-field-canvas { height: min(58vw, 380px); }.live-controls { grid-template-columns: repeat(3, 1fr); }.live-controls .action-button:last-child { grid-column: span 2; } }
 @media (max-width: 680px) { .profile-saved { align-items: flex-start; flex-direction: column; }.live-scorebug { grid-template-columns: 1fr 1fr; }.score-core { grid-column: 1 / -1; grid-row: 2; order: 3; border: 0; border-top: 1px solid rgba(146, 184, 219, .25); }.score-team { grid-template-columns: 38px 1fr auto; min-height: 62px; padding: 10px; gap: 7px; }.score-team-home { grid-template-columns: auto 1fr 38px; }.score-team b { font-size: 2rem; }.score-team strong { font-size: .67rem; }.live-scorebug .team-mark { width: 36px; height: 36px; }.field-labels { flex-wrap: wrap; gap: 8px 13px; }.field-labels strong { width: 100%; margin-left: 0; }.live-field-canvas { height: 64vw; min-height: 235px; }.live-controls { grid-template-columns: repeat(2, 1fr); }.live-controls .action-button:last-child { grid-column: 1 / -1; }.box-score { padding: 16px; }.box-score-head { align-items: flex-start; flex-direction: column; }.box-score-head strong { text-align: left; }.box-score-row { grid-template-columns: .7fr 1.6fr .7fr; } }
+
+/* Lote 06: dossiê persistente da carreira do usuário. */
+.career-start { display: flex; align-items: center; justify-content: space-between; gap: 22px; margin-top: 16px; padding: 22px 25px; border-left: 4px solid #1670bb; }
+.career-start h2 { margin: 0; color: #fff; font-family: var(--display); font-size: 1.18rem; }
+.career-start p:not(.eyebrow) { max-width: 720px; margin: 8px 0 0; color: #adbfce; font-size: .76rem; line-height: 1.45; }
+.form-error { display: block; margin-top: 10px; color: #ff9cae; font-size: .73rem; }
+.career-dossier { display: grid; grid-template-columns: 1.1fr .9fr; gap: 16px; margin-top: 16px; }
+.career-command, .career-objectives, .career-inbox, .career-vacancies { padding: 22px; }
+.career-command { grid-column: 1 / -1; overflow: hidden; background: linear-gradient(112deg, rgba(14, 49, 82, .96), rgba(7, 19, 37, .97)); }
+.career-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; margin-top: 17px; border: 1px solid rgba(113, 159, 198, .28); background: rgba(113, 159, 198, .23); }
+.career-metrics > div { display: grid; gap: 4px; min-height: 70px; padding: 12px; background: rgba(4, 19, 35, .9); }
+.career-metrics span, .career-objective small { color: #90aac1; font-family: var(--display); font-size: .57rem; letter-spacing: .07em; }
+.career-metrics strong { color: #f2c55b; font-family: var(--display); font-size: 1.35rem; }
+.career-metrics strong small { margin-left: 2px; color: #99afc3; font-size: .68rem; }
+.career-disclaimer { margin: 14px 0 0; color: #a8bed1; font-size: .7rem; line-height: 1.45; }
+.career-objectives { display: grid; align-content: start; gap: 0; }
+.career-objectives .panel-heading, .career-inbox .panel-heading, .career-vacancies .panel-heading { margin-bottom: 4px; }
+.career-objective { display: grid; grid-template-columns: 25px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 13px 0; border-top: 1px solid rgba(139, 172, 201, .18); }
+.career-objective > span:first-child { display: grid; place-items: center; width: 21px; height: 21px; border: 1px solid #6386a5; border-radius: 50%; color: #b9cad8; font-family: var(--display); font-size: .62rem; }
+.career-objective.complete > span:first-child { border-color: #59d991; color: #59d991; background: rgba(49, 166, 99, .15); }
+.career-objective strong { color: #eef4f9; font-family: var(--display); font-size: .72rem; }
+.career-objective p { margin: 4px 0; color: #a7bacc; font-size: .69rem; line-height: 1.35; }
+.career-objective .text-button { color: #b7d9f3; font-size: .58rem; text-align: right; }
+.objective-state { color: #8fd5a8; font-family: var(--display); font-size: .56rem; letter-spacing: .05em; }
+.career-inbox { overflow: hidden; }
+.inbox-list { display: grid; }
+.inbox-message { display: flex; gap: 10px; padding: 12px 0; border-top: 1px solid rgba(139, 172, 201, .18); }
+.inbox-message > span { display: grid; place-items: center; flex: 0 0 23px; height: 23px; border: 1px solid #547897; color: #abd0ec; background: #0b2744; font-family: var(--display); font-size: .65rem; }
+.inbox-message.coverage > span { border-color: #efba50; color: #efba50; }
+.inbox-message.career > span { border-color: #55d592; color: #55d592; }
+.inbox-message strong { color: #edf3f8; font-size: .73rem; }
+.inbox-message p { margin: 4px 0 0; color: #a8bacb; font-size: .68rem; line-height: 1.36; }
+.career-vacancies > p { margin: 9px 0 15px; color: #aabdd0; font-size: .72rem; line-height: 1.42; }
+.vacancy-zero { display: block; margin-top: 17px; color: #f0bc54; font-family: var(--display); font-size: 1.1rem; }
+.vacancy-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+.vacancy-grid span { display: grid; gap: 3px; padding: 9px 7px; border: 1px solid rgba(107, 145, 179, .34); color: #cad8e5; background: #081a2f; font-family: var(--display); font-size: .58rem; text-align: center; }
+.vacancy-grid b { color: #f0bc54; font-size: .55rem; }
+.career-vacancies .action-button { margin-top: 14px; font-size: .58rem; }
+.career-vacancies button:disabled { opacity: .55; cursor: not-allowed; }
+@media (max-width: 900px) { .career-dossier { grid-template-columns: 1fr; }.career-command { grid-column: auto; }.career-metrics { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 680px) { .career-start { align-items: flex-start; flex-direction: column; padding: 18px; }.career-start .action-button { width: 100%; }.career-command, .career-objectives, .career-inbox, .career-vacancies { padding: 17px; }.career-objective { grid-template-columns: 23px minmax(0, 1fr); }.career-objective .text-button, .career-objective .objective-state { grid-column: 2; justify-self: start; }.career-metrics { grid-template-columns: 1fr 1fr; }.vacancy-grid { grid-template-columns: 1fr; } }

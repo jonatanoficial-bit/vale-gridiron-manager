@@ -21,7 +21,8 @@ import {
   ROSTER_COVERAGE_2026,
   positionGroups,
 } from './data/roster-2026'
-import type { CatalogSelection, CoachProfile, GameMode, Route } from './domain/contracts'
+import type { CareerObjective, CareerProgress, CatalogSelection, CoachProfile, GameMode, Route } from './domain/contracts'
+import { completeCareerObjective, createCareerProgress, loadCareerProgress, saveCareerProgress, unreadCareerMessages } from './career/progress'
 import { loadCatalogSelection, loadCoachProfile, saveCatalogSelection, saveCoachProfile } from './lib/persistence'
 import { FieldCanvas } from './broadcast/FieldCanvas'
 import { createGame, resolvePlay, simulateToEnd } from './sim/engine'
@@ -68,6 +69,7 @@ function App() {
   const [route, setRoute] = useState<Route>(getRouteFromHash)
   const [profile, setProfile] = useState<CoachProfile>(loadCoachProfile)
   const [catalogSelection, setCatalogSelection] = useState<CatalogSelection>(loadCatalogSelection)
+  const [careerProgress, setCareerProgress] = useState<CareerProgress | null>(loadCareerProgress)
   const [lastSaved, setLastSaved] = useState<string | null>(null)
 
   useEffect(() => {
@@ -92,6 +94,25 @@ function App() {
     setLastSaved('Cenário do catálogo salvo neste navegador')
   }
 
+  function beginCareerDossier() {
+    if (!profile.name.trim()) return false
+    saveCoachProfile(profile)
+    const nextProgress = careerProgress ?? createCareerProgress(profile)
+    saveCareerProgress(nextProgress)
+    setCareerProgress(nextProgress)
+    setLastSaved('Dossiê de carreira salvo neste navegador')
+    return true
+  }
+
+  function advanceCareerObjective(objectiveId: CareerObjective['id']) {
+    if (!careerProgress) return
+    const nextProgress = completeCareerObjective(careerProgress, objectiveId)
+    if (nextProgress === careerProgress) return
+    saveCareerProgress(nextProgress)
+    setCareerProgress(nextProgress)
+    setLastSaved('Progresso da carreira salvo neste navegador')
+  }
+
   function handleNavigation(nextRoute: Route) {
     navigate(nextRoute)
     setRoute(nextRoute)
@@ -105,17 +126,17 @@ function App() {
       <main id="conteudo" className="app-content">
         {route === 'inicio' && <Lobby onNavigate={handleNavigation} coverageLabel={coverageLabel} />}
         {route === 'carreira' && (
-          <Career profile={profile} onChange={setProfile} onSave={persistProfile} onNavigate={handleNavigation} />
+          <Career profile={profile} progress={careerProgress} onChange={setProfile} onSave={persistProfile} onCreateDossier={beginCareerDossier} onAdvanceObjective={advanceCareerObjective} onNavigate={handleNavigation} />
         )}
         {route === 'temporada' && <Sandbox selection={catalogSelection} onSave={persistCatalogSelection} onNavigate={handleNavigation} />}
         {route === 'elenco' && <RosterDatabase />}
-        {route === 'jogoUnico' && <SingleGame selectedFranchiseId={catalogSelection.franchiseId} />}
+        {route === 'jogoUnico' && <SingleGame selectedFranchiseId={catalogSelection.franchiseId} onGameFinalized={() => advanceCareerObjective('match-review')} />}
         {route === 'banco' && <ContentDatabase />}
         {route === 'configuracoes' && <Settings profile={profile} onChange={setProfile} onSave={persistProfile} />}
       </main>
 
       <footer className="app-footer">
-        <span>LOTES 01–05 · FUNDAÇÃO, CATÁLOGO, MOTOR E TRANSMISSÃO</span>
+        <span>LOTES 01–06 · FUNDAÇÃO, JOGO E CARREIRA</span>
         <span>VALE GRIDIRON MANAGER · protótipo independente</span>
         <span>{CONTENT_COVERAGE.catalogLabel}</span>
       </footer>
@@ -224,23 +245,29 @@ function FoundationPanel({ kicker, title, value, description, warn = false }: { 
   return <article className="foundation-panel"><p>{kicker}</p><h2>{title}</h2><strong className={warn ? 'warning' : ''}>{value}</strong><span>{description}</span></article>
 }
 
-function Career({ profile, onChange, onSave, onNavigate }: { profile: CoachProfile; onChange: (profile: CoachProfile) => void; onSave: () => void; onNavigate: (route: Route) => void }) {
+function Career({ profile, progress, onChange, onSave, onCreateDossier, onAdvanceObjective, onNavigate }: { profile: CoachProfile; progress: CareerProgress | null; onChange: (profile: CoachProfile) => void; onSave: () => void; onCreateDossier: () => boolean; onAdvanceObjective: (objectiveId: CareerObjective['id']) => void; onNavigate: (route: Route) => void }) {
   const selectedAvatar = findCoachAvatar(profile.avatarId)
   const [profileSaved, setProfileSaved] = useState(false)
+  const [dossierError, setDossierError] = useState(false)
 
   function updateProfile(nextProfile: CoachProfile) {
     setProfileSaved(false)
+    setDossierError(false)
     onChange(nextProfile)
+  }
+
+  function startDossier() {
+    setDossierError(!onCreateDossier())
   }
 
   return (
     <section className="route-page" aria-labelledby="career-title">
-      <PageHeading eyebrow="MODO CARREIRA" title="SUA JORNADA COMEÇA AQUI" copy="Defina o perfil do técnico. A trilha FCS → FBS → UFL → NFL está registrada, e vagas reais só serão abertas quando cada snapshot tiver staff e elenco validados." />
+      <PageHeading eyebrow="MODO CARREIRA · LOTE 06" title="SUA JORNADA COMEÇA AQUI" copy="Crie e salve o dossiê do técnico do usuário, acompanhe XP, reputação, objetivos e inbox. A trilha FCS → FBS → UFL → NFL continua vinculada exclusivamente a vagas reais verificadas por snapshot." />
       <div className="career-layout">
         <article className="profile-card panel">
           <div className="profile-avatar"><img src={selectedAvatar.path} alt={`Avatar fictício: ${selectedAvatar.label}`} /></div>
           <div><p className="eyebrow">PERFIL DO TÉCNICO</p><h2>{profile.name || 'Novo técnico'}</h2><span>Nível inicial · {profile.difficulty}</span></div>
-          <div className="profile-progress"><span>PROGRESSO DA CARREIRA</span><div><i /></div><strong>0 XP</strong></div>
+          <div className="profile-progress"><span>PROGRESSO DA CARREIRA</span><div><i style={{ width: `${Math.min(100, ((progress?.xp ?? 0) / 300) * 100)}%` }} /></div><strong>{progress?.xp ?? 0} XP</strong></div>
         </article>
         <form className="coach-form panel" onSubmit={(event) => { event.preventDefault(); onSave(); setProfileSaved(true) }}>
           <div className="panel-heading"><span className="panel-icon">✦</span><div><p>CONFIGURAÇÃO</p><h2>CRIE SEU TÉCNICO</h2></div></div>
@@ -260,9 +287,17 @@ function Career({ profile, onChange, onSave, onNavigate }: { profile: CoachProfi
           <button className="text-button" onClick={() => onNavigate('banco')}>CONSULTAR COBERTURA DO CATÁLOGO <span>›</span></button>
         </aside>
       </div>
+      {progress ? <CareerDossier progress={progress} onAdvanceObjective={onAdvanceObjective} onNavigate={onNavigate} /> : <section className="career-start panel" aria-labelledby="career-start-title"><div><p className="eyebrow">DOSSIÊ DE CARREIRA</p><h2 id="career-start-title">PRONTO PARA SER REGISTRADO</h2><p>O dossiê cria um save local para o técnico do usuário. Ele começa sem clube, sem contrato e sem oferta: nenhuma vaga real foi verificada nos snapshots atuais.</p>{dossierError && <strong className="form-error" role="alert">Informe o nome do técnico antes de iniciar o dossiê.</strong>}</div><button className="action-button primary" onClick={startDossier}>INICIAR DOSSIÊ <span>›</span></button></section>}
       <section className="timeline panel"><div className="panel-heading"><span className="panel-icon">◌</span><div><p>FLUXO PLANEJADO</p><h2>CICLO DA SEMANA</h2></div></div><ol>{['Caixa de entrada', 'Treino', 'Plano de jogo', 'Partida', 'Relatórios'].map((step, index) => <li key={step}><span>{index + 1}</span>{step}</li>)}</ol><p className="muted">A estrutura de navegação está pronta; o Lote 04 já fornece a partida determinística e os próximos lotes aprofundarão a carreira.</p></section>
     </section>
   )
+}
+
+function CareerDossier({ progress, onAdvanceObjective, onNavigate }: { progress: CareerProgress; onAdvanceObjective: (objectiveId: CareerObjective['id']) => void; onNavigate: (route: Route) => void }) {
+  const unread = unreadCareerMessages(progress)
+  const completedObjectives = progress.objectives.filter((objective) => objective.state === 'complete').length
+
+  return <section className="career-dossier" aria-labelledby="career-dossier-title"><article className="career-command panel"><div className="panel-heading"><span className="panel-icon">⌁</span><div><p>DOSSIÊ ATIVO · SAVE LOCAL</p><h2 id="career-dossier-title">CENTRAL DA CARREIRA</h2></div></div><div className="career-metrics"><div><span>XP</span><strong>{progress.xp}</strong></div><div><span>REPUTAÇÃO</span><strong>{progress.reputation}<small>/100</small></strong></div><div><span>OBJETIVOS</span><strong>{completedObjectives}<small>/{progress.objectives.length}</small></strong></div><div><span>CLUBE ATUAL</span><strong>—</strong></div></div><p className="career-disclaimer">XP e reputação são modelo interno do progresso do usuário. Sem vaga confirmada, o save não atribui clube, contrato, salário ou entrevista a uma organização real.</p></article><article className="career-objectives panel"><div className="panel-heading"><span className="panel-icon">◎</span><div><p>PLANO DE DESENVOLVIMENTO</p><h2>OBJETIVOS ATIVOS</h2></div></div>{progress.objectives.map((objective) => <div className={`career-objective ${objective.state}`} key={objective.id}><span>{objective.state === 'complete' ? '✓' : objective.state === 'blocked' ? '!' : '○'}</span><div><strong>{objective.label}</strong><p>{objective.detail}</p><small>+{objective.rewardXp} XP · +{objective.rewardReputation} REP</small></div>{objective.id === 'catalog-review' && objective.state === 'active' ? <button className="text-button" onClick={() => onAdvanceObjective('catalog-review')}>REGISTRAR LEITURA</button> : objective.id === 'match-review' && objective.state === 'active' ? <button className="text-button" onClick={() => onNavigate('jogoUnico')}>ABRIR PARTIDA</button> : <span className="objective-state">{objective.state === 'complete' ? 'CONCLUÍDO' : 'BLOQUEADO'}</span>}</div>)}</article><article className="career-inbox panel"><div className="panel-heading"><span className="panel-icon">✉</span><div><p>INBOX · {unread} NOVAS</p><h2>MENSAGENS</h2></div></div><div className="inbox-list">{progress.inbox.slice(0, 4).map((message) => <article key={message.id} className={`inbox-message ${message.category}`}><span>{message.category === 'coverage' ? '▣' : message.category === 'career' ? '★' : 'i'}</span><div><strong>{message.title}</strong><p>{message.body}</p></div></article>)}</div></article><article className="career-vacancies panel"><div className="panel-heading"><span className="panel-icon">⌂</span><div><p>MERCADO DE TRABALHO</p><h2>VAGAS REAIS</h2></div></div><strong className="vacancy-zero">0 VAGAS VERIFICADAS</strong><p>O catálogo atual não comprova uma vaga de comissão, entrevista, salário ou contrato. Nenhuma proposta é gerada como enfeite.</p><div className="vacancy-grid"><span>FBS/FCS <b>PENDENTE</b></span><span>UFL <b>PENDENTE</b></span><span>NFL <b>PENDENTE</b></span></div><button className="action-button secondary full" disabled>OFERTAS BLOQUEADAS POR COBERTURA</button></article></section>
 }
 
 function Sandbox({ selection, onSave, onNavigate }: { selection: CatalogSelection; onSave: (selection: CatalogSelection) => void; onNavigate: (route: Route) => void }) {
@@ -279,13 +314,14 @@ function Sandbox({ selection, onSave, onNavigate }: { selection: CatalogSelectio
   return <section className="route-page" aria-labelledby="sandbox-title"><PageHeading eyebrow="TEMPORADA SANDBOX" title="CONFIGURE O SEU CENÁRIO" copy="Escolha uma competição e uma equipe real com identificação confirmada. O catálogo preserva o snapshot, a fonte e as lacunas sem fingir que roster, mídia ou fixtures já estão completos." /><div className="setup-layout"><article className="setup-steps panel"><p className="eyebrow">CONFIGURAÇÃO 01/03</p><h2>SELEÇÃO DE CATÁLOGO</h2><label>Competição<select value={activeSnapshot.seasonId} onChange={(event) => selectSnapshot(event.target.value)}>{selectableSnapshots.map((snapshot) => <option key={snapshot.seasonId} value={snapshot.seasonId}>{snapshot.leagueName} · {snapshot.seasonYear}</option>)}</select></label><label>Snapshot da temporada<select value={activeSnapshot.seasonId} onChange={(event) => selectSnapshot(event.target.value)}>{selectableSnapshots.map((snapshot) => <option key={snapshot.seasonId} value={snapshot.seasonId}>{snapshot.seasonId}</option>)}</select></label><label>Equipe real<select value={activeClub?.leagueId === activeSnapshot.leagueId ? selection.franchiseId ?? '' : ''} onChange={(event) => onSave({ seasonId: activeSnapshot.seasonId, franchiseId: event.target.value || null })}><option value="">Selecione uma equipe</option>{clubs.map((club) => <option key={club.id} value={club.id}>{club.name}</option>)}</select></label><div className="inline-notice"><span>i</span><div><strong>{activeClub ? `${activeClub.name} selecionado` : 'Seleção ainda não concluída'}</strong><br />Roster, staff, uniforme e agenda completa continuam bloqueados até o snapshot correspondente ser importado.</div></div></article><aside className="setup-status panel"><p className="eyebrow">INTEGRIDADE DO SNAPSHOT</p><h2>{snapshotStatus}</h2><div className="status-meter"><span>Identificação de equipes</span><strong>100%</strong><div><i className="meter-full" /></div></div><div className="status-meter"><span>Regras estruturais</span><strong>{activeSnapshot.leagueId === 'ufl' ? '100%' : 'PARCIAL'}</strong><div><i className={activeSnapshot.leagueId === 'ufl' ? 'meter-full' : 'meter-partial'} /></div></div><div className="status-meter"><span>Fixtures e rosters</span><strong>PENDENTE</strong><div><i className="meter-empty" /></div></div><button className="action-button secondary full" onClick={() => onNavigate('banco')}>VER RELATÓRIO DE COBERTURA <span>↗</span></button></aside></div></section>
 }
 
-function SingleGame({ selectedFranchiseId }: { selectedFranchiseId: string | null }) {
+function SingleGame({ selectedFranchiseId, onGameFinalized }: { selectedFranchiseId: string | null; onGameFinalized: () => void }) {
   const clubs = [...NFL_2026_FRANCHISES, ...UFL_2026_FRANCHISES]
   const initialHome = findFranchise(selectedFranchiseId)?.id ?? clubs[0].id
   const initialAway = clubs.find((club) => club.id !== initialHome)?.id ?? clubs[1].id
   const [homeId, setHomeId] = useState(initialHome)
   const [awayId, setAwayId] = useState(initialAway)
   const [gameState, setGameState] = useState<GameState | null>(null)
+  const [finalReported, setFinalReported] = useState(false)
   const home = findFranchise(homeId) ?? clubs[0]
   const away = findFranchise(awayId) ?? clubs[1]
 
@@ -300,6 +336,7 @@ function SingleGame({ selectedFranchiseId }: { selectedFranchiseId: string | nul
   }
 
   function startGame() {
+    setFinalReported(false)
     setGameState(createGame({
       gameId: `${home.id}-vs-${away.id}`,
       seed: `${home.id}:${away.id}:lot-04-05`,
@@ -308,8 +345,16 @@ function SingleGame({ selectedFranchiseId }: { selectedFranchiseId: string | nul
     }))
   }
 
+  function commitGame(nextGameState: GameState) {
+    setGameState(nextGameState)
+    if (nextGameState.status === 'final' && !finalReported) {
+      setFinalReported(true)
+      onGameFinalized()
+    }
+  }
+
   if (gameState) {
-    return <LiveGame state={gameState} home={home} away={away} onPlay={(call) => setGameState((current) => current ? resolvePlay(current, call) : current)} onSimulate={() => setGameState((current) => current ? simulateToEnd(current) : current)} onNewGame={() => setGameState(null)} />
+    return <LiveGame state={gameState} home={home} away={away} onPlay={(call) => commitGame(resolvePlay(gameState, call))} onSimulate={() => commitGame(simulateToEnd(gameState))} onNewGame={() => { setGameState(null); setFinalReported(false) }} />
   }
 
   return <section className="route-page" aria-labelledby="single-title"><PageHeading eyebrow="JOGO ÚNICO · LOTES 04–05" title="PREPARE A PARTIDA" copy="O motor determinístico já executa posses, relógio, placar e EventLog. As equipes e escudos são os registros reais do catálogo; como os rosters e ratings completos ainda não existem, esta partida usa um baseline tático neutro e não atribui ações a atletas reais." /><div className="single-game-board panel"><div className="matchup-row"><MatchSlot side="MANDANTE" franchise={home} value={homeId} onChange={selectHome} clubs={clubs} /><div className="versus">VS<small>PRÉ-JOGO · 04–05</small></div><MatchSlot side="VISITANTE" franchise={away} value={awayId} onChange={selectAway} clubs={clubs} /></div><div className="field-preview" aria-hidden="true"><div className="yard-lines" /><span>CAMPO DE JOGO</span><small>RENDER TÁTICO 2D · LOTE 05</small></div><div className="game-options"><div><span>REGRAS</span><strong>{home.leagueId === away.leagueId ? home.leagueId.toUpperCase() + ' 2026' : 'PROTOCOLO NEUTRO'}</strong></div><div><span>ELENCOS</span><strong>Marcadores neutros</strong></div><div><span>DURAÇÃO</span><strong>4 × 15 minutos</strong></div><button className="action-button primary" onClick={startGame}>INICIAR PARTIDA <span>›</span></button></div></div><div className="content-callout"><span>✓</span><div><strong>Motor Lote 04 + transmissão 2D Lote 05 ativos.</strong><p>Seed fixa, EventLog e projeções vêm do motor. O canvas só renderiza o estado; os 22 marcadores são táticos e neutros, não uniformes ou atletas oficiais.</p></div></div></section>
