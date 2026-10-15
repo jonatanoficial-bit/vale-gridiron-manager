@@ -2,6 +2,49 @@ import type { GameEvent, GameEventType, GameSetup, GameState, PlayCall } from '.
 
 export const GAME_QUARTER_MS = 15 * 60 * 1000
 
+const neutralStrategy: GameState['strategy'] = {
+  offensiveIdentity: 'balanced',
+  defensiveIdentity: 'contain',
+  aggression: 55,
+  readiness: 50,
+  fatigueRisk: 20,
+  chemistry: 50,
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, value))
+}
+
+function normalizeStrategy(strategy?: GameSetup['strategy']): GameState['strategy'] {
+  return {
+    ...neutralStrategy,
+    ...strategy,
+    aggression: clamp(strategy?.aggression ?? neutralStrategy.aggression, 25, 85),
+    readiness: clamp(strategy?.readiness ?? neutralStrategy.readiness, 0, 100),
+    fatigueRisk: clamp(strategy?.fatigueRisk ?? neutralStrategy.fatigueRisk, 0, 100),
+    chemistry: clamp(strategy?.chemistry ?? neutralStrategy.chemistry, 0, 100),
+  }
+}
+
+function hasCustomStrategy(strategy: GameState['strategy']) {
+  return strategy.offensiveIdentity !== neutralStrategy.offensiveIdentity
+    || strategy.defensiveIdentity !== neutralStrategy.defensiveIdentity
+    || strategy.aggression !== neutralStrategy.aggression
+    || strategy.readiness !== neutralStrategy.readiness
+    || strategy.fatigueRisk !== neutralStrategy.fatigueRisk
+    || strategy.chemistry !== neutralStrategy.chemistry
+}
+
+function strategyText(strategy: GameState['strategy']) {
+  const offense = strategy.offensiveIdentity === 'air-raid' ? 'ataque aéreo' : strategy.offensiveIdentity === 'ground-control' ? 'controle terrestre' : 'equilíbrio situacional'
+  const defense = strategy.defensiveIdentity === 'pressure' ? 'pressão' : strategy.defensiveIdentity === 'coverage' ? 'cobertura' : 'contenção'
+  return `Plano tático ativo · ${offense}, ${defense}, agressividade ${strategy.aggression}.`
+}
+
+function preparationDelta(state: GameState) {
+  return (state.strategy.readiness - 50) * 0.002 + (state.strategy.chemistry - 50) * 0.0014 - state.strategy.fatigueRisk * 0.0012
+}
+
 function hashSeed(seed: string) {
   let hash = 2166136261
   for (let index = 0; index < seed.length; index += 1) {
@@ -92,23 +135,29 @@ function shortPass(state: GameState) {
   const teamId = state.offenseId
   let draw = random(state)
   let next = addEvent(draw.state, 'snap', `Snap · ${firstAndTenText(state.down, state.distance)}.`, { teamId })
-  if (draw.value < 0.055) {
+  const preparation = preparationDelta(state)
+  const aggressionRisk = (state.strategy.aggression - 55) * 0.0007
+  const identityBonus = state.strategy.offensiveIdentity === 'air-raid' ? 0.032 : state.strategy.offensiveIdentity === 'ground-control' ? -0.018 : 0
+  if (draw.value < clamp(0.055 + aggressionRisk - preparation * 0.25, 0.025, 0.11)) {
     next = addEvent(next, 'interception', 'Passe interceptado.', { teamId })
     return switchPossession(next, Math.max(5, Math.min(95, 100 - state.ballSpot)))
   }
-  if (draw.value < 0.14) {
+  if (draw.value < clamp(0.14 - preparation * 0.32 + (state.strategy.defensiveIdentity === 'pressure' ? 0.01 : 0), 0.08, 0.21)) {
     draw = random(next)
     return resolveGain(draw.state, 'sack', -(3 + Math.floor(draw.value * 6)))
   }
-  if (draw.value < 0.43) return changeDown(addEvent(next, 'pass-incomplete', 'Passe incompleto.', { teamId }))
+  if (draw.value < clamp(0.43 - identityBonus - preparation, 0.31, 0.5)) return changeDown(addEvent(next, 'pass-incomplete', 'Passe incompleto.', { teamId }))
   draw = random(next)
-  return resolveGain(draw.state, 'pass-complete', 3 + Math.floor(draw.value * 15))
+  const yardsBonus = state.strategy.offensiveIdentity === 'air-raid' ? 3 : 0
+  return resolveGain(draw.state, 'pass-complete', 3 + yardsBonus + Math.floor(draw.value * 15))
 }
 
 function rush(state: GameState) {
   const snap = addEvent(state, 'snap', `Snap · ${firstAndTenText(state.down, state.distance)}.`, { teamId: state.offenseId })
   const draw = random(snap)
-  return resolveGain(draw.state, 'run', -2 + Math.floor(draw.value * 13))
+  const preparation = preparationDelta(state)
+  const groundBonus = state.strategy.offensiveIdentity === 'ground-control' ? 3 : state.strategy.offensiveIdentity === 'air-raid' ? -1 : 0
+  return resolveGain(draw.state, 'run', -2 + groundBonus + Math.floor(draw.value * 13) + Math.round(preparation * 3))
 }
 
 function punt(state: GameState) {
@@ -137,9 +186,10 @@ function fieldGoal(state: GameState) {
 export function createGame(setup: GameSetup): GameState {
   const opening = setup.homeTeamId
   const receiving = setup.awayTeamId
+  const strategy = normalizeStrategy(setup.strategy)
   const state: GameState = {
     gameId: setup.gameId,
-    engineVersion: 'lot-04-neutral-v1',
+    engineVersion: hasCustomStrategy(strategy) ? 'lot-09-strategy-v1' : 'lot-04-neutral-v1',
     seed: setup.seed,
     randomState: hashSeed(setup.seed),
     homeTeamId: setup.homeTeamId,
@@ -154,11 +204,13 @@ export function createGame(setup: GameSetup): GameState {
     ballSpot: 25,
     down: 1,
     distance: 10,
+    strategy,
     eventNumber: 0,
     status: 'in-progress',
     events: [],
   }
-  return addEvent(state, 'kickoff', 'Kickoff inicial · posse visitante.', { teamId: receiving })
+  const kickoff = addEvent(state, 'kickoff', 'Kickoff inicial · posse visitante.', { teamId: receiving })
+  return hasCustomStrategy(strategy) ? addEvent(kickoff, 'kickoff', strategyText(strategy), { teamId: null }) : kickoff
 }
 
 export function resolvePlay(state: GameState, call: PlayCall): GameState {
@@ -174,7 +226,8 @@ function chooseAiPlay(state: GameState): PlayCall {
   if (state.down === 4 && state.ballSpot >= 58 && state.distance <= 5) return 'field-goal'
   if (state.down === 4 && state.ballSpot < 58) return 'punt'
   const next = random(state)
-  return next.value > 0.52 ? 'short-pass' : 'rush'
+  const passThreshold = state.strategy.offensiveIdentity === 'air-raid' ? 0.38 : state.strategy.offensiveIdentity === 'ground-control' ? 0.67 : 0.52
+  return next.value > passThreshold ? 'short-pass' : 'rush'
 }
 
 export function simulateToEnd(state: GameState): GameState {

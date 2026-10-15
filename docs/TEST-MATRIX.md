@@ -1,4 +1,4 @@
-# Matriz de testes - Lotes 01–06
+# Matriz de testes - Lotes 01–09
 
 | Área | Evidência atual | Comando |
 | --- | --- | --- |
@@ -14,6 +14,9 @@
 | SimEngine Lote 04 | Determinismo por seed, `snap` antes da ação, pontos apenas por eventos de pontuação e fim de partida | `pnpm test` |
 | Transmissão Lote 05 | Campo Canvas consome estado do motor; o App abre a partida e mostra EventLog/placar | `pnpm test` |
 | Carreira Lote 06 | Dossiê do usuário nasce sem clube/vaga inventada e objetivos só recompensam uma vez | `pnpm test` |
+| Universidade Lote 07 | Pipeline de recrutamento, portal, elegibilidade e pós-temporada informa lacunas sem gerar universidades ou atletas | revisão de UI + `pnpm test` |
+| Profissional Lote 08 | Front office separa o ciclo profissional; cap, trades, waivers e contratos ficam bloqueados sem dados importados | revisão de UI + `pnpm test` |
+| Tática e gestão Lote 09 | Plano persistente altera treino/scouting e entra no SimEngine sem perder determinismo | `pnpm test` |
 | Tipagem e build | TypeScript strict e bundle Vite | `pnpm build` |
 | Qualidade estática | Lint do repositório | `pnpm lint` |
 | GitHub Pages | Workflow cria o artefato `dist` | GitHub Actions após o push |

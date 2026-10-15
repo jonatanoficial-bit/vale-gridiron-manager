@@ -1,6 +1,6 @@
 # Cobertura de conteúdo
 
-## Estado após o Lote 06
+## Estado após o Lote 09
 
 | Camada | Estado | Regra |
 | --- | --- | --- |
@@ -16,6 +16,9 @@
 | Campo de futebol americano de referência | Pronto para interface | PNG fornecido pelo usuário foi copiado sem alteração para `public/media/campo-futebol-americano-referencia.png`; é uma referência visual, não o estádio oficial de uma equipe. |
 | SimEngine e transmissão tática | Parcial | Há motor determinístico e campo 2D com marcadores neutros. Não existem ratings, escalações, uniformes ou representações individuais no cálculo ou no canvas. |
 | Carreira do técnico do usuário | Parcial | Dossiê persistente, XP, reputação, objetivos e inbox funcionam localmente. Clube, oferta, entrevista, contrato e salário continuam nulos até uma vaga real ser importada. |
+| Universidade | Parcial | Pipeline de recruiting, portal, elegibilidade e pós-temporada está disponível como fluxo de gestão. Universidades, prospects, atletas, rankings, bolsas e calendários continuam pendentes de importação versionada. |
+| Operação profissional | Parcial | Ciclo de avaliação, free agency, draft e camp está disponível. Contratos de atletas, cap hit, dead cap, trades, waivers, ordem de draft e fixtures permanecem bloqueados sem fonte. |
+| Tática, treino, scouting e gestão | Parcial | Plano persistente altera parâmetros internos e determinísticos do SimEngine. Prontidão, fadiga, química, insight e reserva não são dados oficiais de clube ou atleta. |
 
 ## Contrato de snapshot
 

@@ -1,5 +1,17 @@
 # Status dos lotes
 
+## Lotes 07, 08 e 09 — sistemas estruturais, com dados bloqueados onde necessário
+
+- `#/gestao` oferece três áreas jogáveis: pipeline universitário, front office profissional e tática/performance.
+- O plano local persiste treino, scouting, instalações e identidade tática; esses parâmetros entram no SimEngine e produzem diferenças determinísticas no EventLog.
+- O pipeline universitário não cria instituições, athletes, prospects ou rankings. O painel profissional não cria contratos, cap hit, transações ou propostas.
+
+### Pendente para o aceite completo
+
+- Lote 07: diretórios universitários, prospects, elegibilidade por atleta, conferências, calendários e postseason por temporada.
+- Lote 08: contratos e cap hit de atletas, free agency, trades, draft, waivers, calendário, standings e playoffs versionados.
+- Lote 09: ratings, staff, lesões, química por atleta, dados de scouting e economia por liga com fontes e metodologia auditáveis.
+
 ## Lote 06 — parcial, com save funcional
 
 - Dossiê local persistente para o técnico do usuário com XP, reputação, inbox e objetivos.
@@ -28,7 +40,7 @@
 
 - Base Vite + React + TypeScript strict.
 - Design system de interface esportiva responsivo, inspirado na direção visual fornecida sem usar imagens como botões.
-- Lobby e rotas navegáveis para Carreira, Temporada Sandbox e Jogo Único.
+- Lobby e rotas navegáveis para Carreira, Temporada e Jogo Único.
 - Perfil do técnico com save local de demonstração.
 - Contratos de dados, página de cobertura e bloqueios honestos para conteúdo que ainda não existe.
 - Manifesto web básico, workflow de validação e deploy para GitHub Pages.

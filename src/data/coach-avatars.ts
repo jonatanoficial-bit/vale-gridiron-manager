@@ -32,6 +32,24 @@ export const COACH_AVATARS: CoachAvatarOption[] = [
     description: 'Experiência e calma antes do kickoff.',
     path: '/avatars/coach-veteran-vision.png',
   },
+  {
+    id: 'brazilian-strategist',
+    label: 'Estratégia brasileira',
+    description: 'Leitura humana e comando sereno de sideline.',
+    path: '/avatars/coach-brazilian-strategist.png',
+  },
+  {
+    id: 'latino-analyst',
+    label: 'Analista latino',
+    description: 'Preparação, vídeo e decisões precisas.',
+    path: '/avatars/coach-latino-analyst.png',
+  },
+  {
+    id: 'east-asian-innovator',
+    label: 'Inovação asiática',
+    description: 'Tática moderna e estudo detalhado do adversário.',
+    path: '/avatars/coach-east-asian-innovator.png',
+  },
 ]
 
 export function findCoachAvatar(id: CoachAvatarId) {

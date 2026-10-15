@@ -1,10 +1,10 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { NFL_2026_FRANCHISES, RIGHTS_ASSET_MANIFEST_2026, RULESETS_2026, UFL_2026_FRANCHISES } from './data/catalog-2026'
 import { BILLS_2026_ROSTER, BILLS_2026_ROSTER_IMPORT, BILLS_2026_STAFF, BILLS_2026_STAFF_CONTRACTS } from './data/roster-2026'
 import App from './App'
 
-describe('Lotes 01 a 06', () => {
+describe('Lotes 01 a 09', () => {
   beforeEach(() => {
     window.location.hash = '#/'
     window.localStorage.clear()
@@ -19,7 +19,7 @@ describe('Lotes 01 a 06', () => {
     expect(screen.getByRole('img', { name: /vale gridiron manager/i })).toHaveAttribute('src', '/brand/vale-gridiron-manager.png')
     expect(screen.getByRole('heading', { name: /construa/i })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /modo carreira/i })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /temporada sandbox/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /temporada/i })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /jogo único/i })).toBeInTheDocument()
   })
 
@@ -34,7 +34,7 @@ describe('Lotes 01 a 06', () => {
     expect(window.localStorage.getItem('vale-gridiron-manager:coach-profile:v1')).toContain('rain-tactician')
     expect(screen.getByRole('img', { name: /avatar fictício: tático sob pressão/i })).toHaveAttribute('src', '/avatars/coach-rain-tactician.png')
     expect(screen.getByRole('status')).toHaveTextContent(/perfil salvo/i)
-    expect(screen.getByRole('button', { name: /continuar/i })).toBeInTheDocument()
+    expect(within(screen.getByRole('status')).getByRole('button', { name: /temporada/i })).toBeInTheDocument()
   })
 
   it('creates a user-coach dossier without inventing a real job or contract', () => {
@@ -44,6 +44,7 @@ describe('Lotes 01 a 06', () => {
     fireEvent.click(screen.getByRole('button', { name: /iniciar dossiê/i }))
     expect(screen.getByRole('heading', { name: /central da carreira/i })).toBeInTheDocument()
     expect(screen.getByText(/0 vagas verificadas/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /registrar plano/i })).toBeInTheDocument()
     expect(window.localStorage.getItem('vale-gridiron-manager:career-progress:v1')).toContain('user-coach-alex-v1')
     fireEvent.click(screen.getByRole('button', { name: /registrar leitura/i }))
     expect(screen.getByText('135')).toBeInTheDocument()
@@ -60,10 +61,11 @@ describe('Lotes 01 a 06', () => {
 
   it('persists an explicitly selected real team for the sandbox', () => {
     render(<App />)
-    fireEvent.click(screen.getByRole('button', { name: /abrir sandbox/i }))
+    fireEvent.click(screen.getByRole('button', { name: /abrir temporada/i }))
     fireEvent.change(screen.getByLabelText(/equipe real/i), { target: { value: 'nfl-buffalo-bills' } })
     expect(window.localStorage.getItem('vale-gridiron-manager:catalog-selection:v1')).toContain('nfl-buffalo-bills')
     expect(screen.getByText(/buffalo bills selecionado/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /buffalo bills/i })).toHaveAttribute('aria-pressed', 'true')
   })
 
   it('uses the registered Buffalo Bills crest in the single-game selection', () => {
@@ -81,6 +83,21 @@ describe('Lotes 01 a 06', () => {
     expect(screen.getByRole('button', { name: /passe curto/i })).toBeEnabled()
     fireEvent.click(screen.getByRole('button', { name: /passe curto/i }))
     expect(screen.getByText(/play-by-play/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /aplicar ajuda/i })).toBeEnabled()
+  })
+
+  it('persists a football-operations plan and carries it into the deterministic match', () => {
+    window.location.hash = '#/gestao'
+    render(<App />)
+    expect(screen.getByRole('heading', { name: /comando de performance/i })).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText(/identidade ofensiva/i), { target: { value: 'air-raid' } })
+    fireEvent.change(screen.getByLabelText(/foco de treinamento/i), { target: { value: 'recovery' } })
+    fireEvent.click(screen.getByRole('button', { name: /executar sessão/i }))
+    expect(window.localStorage.getItem('vale-gridiron-manager:operations-plan:v1')).toContain('air-raid')
+    expect(screen.getAllByText(/prontidão/i).length).toBeGreaterThan(0)
+    fireEvent.click(screen.getByRole('button', { name: /testar no jogo único/i }))
+    fireEvent.click(screen.getByRole('button', { name: /iniciar partida/i }))
+    expect(screen.getByText(/lot-09-strategy-v1/i)).toBeInTheDocument()
   })
 
   it('keeps the Buffalo Bills import auditable and without invented contracts or ratings', () => {

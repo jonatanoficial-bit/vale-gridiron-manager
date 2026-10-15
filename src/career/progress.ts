@@ -40,6 +40,14 @@ function initialObjectives(): CareerObjective[] {
       state: 'active',
     },
     {
+      id: 'football-plan',
+      label: 'Montar o primeiro plano de jogo',
+      detail: 'Defina identidade, carga de treino e foco de scouting no Centro de Futebol antes de buscar oportunidades.',
+      rewardXp: 50,
+      rewardReputation: 2,
+      state: 'active',
+    },
+    {
       id: 'match-review',
       label: 'Concluir análise de partida',
       detail: 'Registre uma partida tática finalizada pelo SimEngine. O resultado não cria vínculo com um clube real.',
@@ -71,7 +79,9 @@ export function loadCareerProgress(): CareerProgress | null {
     if (!saved) return null
     const parsed = JSON.parse(saved) as Partial<CareerProgress>
     if (parsed.schemaVersion !== 1 || !Array.isArray(parsed.objectives) || !Array.isArray(parsed.inbox)) return null
-    return parsed as CareerProgress
+    const progress = parsed as CareerProgress
+    if (progress.objectives.some((objective) => objective.id === 'football-plan')) return progress
+    return { ...progress, objectives: [...progress.objectives, initialObjectives().find((objective) => objective.id === 'football-plan')!] }
   } catch {
     return null
   }
@@ -92,6 +102,11 @@ function completionMessage(objective: CareerObjective): CareerInboxMessage {
       category: 'coverage',
       title: 'Cobertura revisada',
       body: 'A leitura foi registrada. Nenhuma vaga ou contrato foi criado a partir de dados pendentes.',
+    },
+    'football-plan': {
+      category: 'career',
+      title: 'Plano de jogo validado',
+      body: 'Seu plano local foi registrado como uma etapa de desenvolvimento. A conquista não gera vaga ou proposta sem fonte verificada.',
     },
     'match-review': {
       category: 'career',

@@ -1,8 +1,15 @@
-export type Route = 'inicio' | 'carreira' | 'temporada' | 'elenco' | 'jogoUnico' | 'banco' | 'configuracoes'
+export type Route = 'inicio' | 'carreira' | 'temporada' | 'elenco' | 'jogoUnico' | 'gestao' | 'banco' | 'configuracoes'
 
 export type GameMode = 'career' | 'season' | 'game'
 
-export type CoachAvatarId = 'sideline-command' | 'rain-tactician' | 'facility-leader' | 'veteran-vision'
+export type CoachAvatarId =
+  | 'sideline-command'
+  | 'rain-tactician'
+  | 'facility-leader'
+  | 'veteran-vision'
+  | 'brazilian-strategist'
+  | 'latino-analyst'
+  | 'east-asian-innovator'
 
 export type ContentStatus = 'pending' | 'partial' | 'ready'
 
@@ -148,7 +155,7 @@ export interface CareerSaveContract {
 export type CareerObjectiveState = 'active' | 'complete' | 'blocked'
 
 export interface CareerObjective {
-  id: 'profile-file' | 'catalog-review' | 'match-review'
+  id: 'profile-file' | 'catalog-review' | 'football-plan' | 'match-review'
   label: string
   detail: string
   rewardXp: number
@@ -174,4 +181,41 @@ export interface CareerProgress {
   reputation: number
   objectives: CareerObjective[]
   inbox: CareerInboxMessage[]
+}
+
+export type OffensiveIdentity = 'balanced' | 'air-raid' | 'ground-control'
+
+export type DefensiveIdentity = 'contain' | 'pressure' | 'coverage'
+
+export type TrainingFocus = 'recovery' | 'execution' | 'conditioning' | 'cohesion'
+
+export type ScoutingFocus = 'quarterback' | 'line' | 'secondary' | 'best-available'
+
+export type OperationsEntryKind = 'training' | 'scouting' | 'facility' | 'finance' | 'college' | 'pro'
+
+export interface OperationsEntry {
+  id: string
+  kind: OperationsEntryKind
+  title: string
+  detail: string
+}
+
+export interface OperationsPlan {
+  schemaVersion: 1
+  updatedAt: string
+  offensiveIdentity: OffensiveIdentity
+  defensiveIdentity: DefensiveIdentity
+  aggression: number
+  trainingFocus: TrainingFocus
+  practiceIntensity: number
+  readiness: number
+  fatigueRisk: number
+  chemistry: number
+  scoutingFocus: ScoutingFocus
+  scoutingInsight: number
+  facilityPriority: 'medical' | 'performance' | 'analysis'
+  operatingReserve: number
+  collegePhase: 'recruiting' | 'portal' | 'eligibility' | 'postseason'
+  proPhase: 'evaluation' | 'free-agency' | 'draft' | 'camp'
+  entries: OperationsEntry[]
 }

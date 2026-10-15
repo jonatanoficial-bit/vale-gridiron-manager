@@ -1,5 +1,14 @@
 export type PlayCall = 'rush' | 'short-pass' | 'punt' | 'field-goal'
 
+export interface GameStrategy {
+  offensiveIdentity: 'balanced' | 'air-raid' | 'ground-control'
+  defensiveIdentity: 'contain' | 'pressure' | 'coverage'
+  aggression: number
+  readiness: number
+  fatigueRisk: number
+  chemistry: number
+}
+
 export type GameEventType =
   | 'kickoff'
   | 'snap'
@@ -40,7 +49,7 @@ export interface TeamGameStats {
 
 export interface GameState {
   gameId: string
-  engineVersion: 'lot-04-neutral-v1'
+  engineVersion: 'lot-04-neutral-v1' | 'lot-09-strategy-v1'
   seed: string
   randomState: number
   homeTeamId: string
@@ -55,6 +64,7 @@ export interface GameState {
   ballSpot: number
   down: number
   distance: number
+  strategy: GameStrategy
   eventNumber: number
   status: 'in-progress' | 'final'
   events: readonly GameEvent[]
@@ -66,6 +76,7 @@ export interface GameSetup {
   homeTeamId: string
   awayTeamId: string
   quarterMs?: number
+  strategy?: Partial<GameStrategy>
 }
 
 export interface GameProjection {
