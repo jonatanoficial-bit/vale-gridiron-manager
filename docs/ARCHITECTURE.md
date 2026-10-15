@@ -1,4 +1,4 @@
-# Arquitetura dos Lotes 01–09
+# Arquitetura dos Lotes 01–12
 
 ## Objetivo desta entrega
 
@@ -13,8 +13,10 @@ Esta base implementa o shell navegável para os três modos, contratos iniciais 
 - `src/operations/plan.ts`: plano local de universidade/profissional/performance, sessões de treino, ciclo de scouting e persistência do Centro de Futebol.
 - `src/domain/contracts.ts`: contratos tipados de perfil, cobertura e snapshots.
 - `src/data/content-status.ts`: estado explícito da cobertura de conteúdo real.
-- `src/lib/persistence.ts`: persistência transitória do perfil em `localStorage`.
-- `public/`: manifest, service worker simples, emblema VALE e campo de referência fornecidos pelo usuário, preservados sem alterações, e avatares originais de perfil em `public/avatars/`.
+- `src/lib/persistence.ts`: cópia de compatibilidade dos perfis e escolhas em `localStorage`.
+- `src/lib/save-vault.ts`: espelho do save ativo em IndexedDB e contrato do arquivo exportável/importável.
+- `src/sim/autoplay.ts`: recomendação automática e momentos de decisão da transmissão, derivados de `GameState`.
+- `public/`: manifest, service worker progressivo, emblema VALE e campo de referência fornecidos pelo usuário, artes neutras originais em `public/art/` e avatares originais de perfil em `public/avatars/`.
 
 ## Decisões de base
 

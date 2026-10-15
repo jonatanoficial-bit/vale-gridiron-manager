@@ -28,13 +28,13 @@ export function FieldCanvas({ state }: { state: GameState }) {
     const fieldWidth = width * 0.84
     const fieldHeight = height * 0.82
     const endZone = fieldWidth * 0.09
-    context.fillStyle = '#123b2c'
+    context.fillStyle = 'rgba(8, 56, 34, .42)'
     context.fillRect(left, top, fieldWidth, fieldHeight)
-    context.fillStyle = '#173c6d'
+    context.fillStyle = 'rgba(4, 23, 47, .52)'
     context.fillRect(left, top, endZone, fieldHeight)
-    context.fillStyle = '#8f1830'
+    context.fillStyle = 'rgba(52, 12, 24, .48)'
     context.fillRect(left + fieldWidth - endZone, top, endZone, fieldHeight)
-    context.strokeStyle = 'rgba(235, 252, 240, .7)'
+    context.strokeStyle = 'rgba(235, 252, 240, .82)'
     context.lineWidth = 1
     for (let yard = 0; yard <= 100; yard += 5) {
       const x = left + endZone + (yard / 100) * (fieldWidth - endZone * 2)

@@ -1,5 +1,19 @@
 # Status dos lotes
 
+## Lotes 10, 11 e 12 — integração parcial, com evidência
+
+- UX de transmissão com campo cinematográfico neutro, HUD de clubes e piloto tático que pausa em cenários críticos.
+- Direção visual de console, cards de modos com arte, controles com feedback e suporte a movimento reduzido.
+- Auto-save em localStorage com espelho IndexedDB, export/import de save JSON e service worker progressivo.
+- XP por sessões táticas concluídas e trilha de credenciais somente para o perfil do usuário.
+- Build e 22 testes automatizados aprovados; fluxo de pausa e retomada também revisado no navegador local.
+
+### Pendente para o aceite completo
+
+- Lote 10: áudio, internacionalização e teste em aparelhos físicos.
+- Lote 11: teste de recuperação offline no deploy, slots/recuperação avançada, cloud opcional e auditoria de licenças final.
+- Lote 12: stress de temporadas baseado em dados completos, release candidate, créditos e auditoria final de direitos.
+
 ## Lotes 07, 08 e 09 — sistemas estruturais, com dados bloqueados onde necessário
 
 - `#/gestao` oferece três áreas jogáveis: pipeline universitário, front office profissional e tática/performance.
@@ -48,8 +62,8 @@
 
 ### Simplificado
 
-- A persistência usa `localStorage` até a implementação de slots e migração em IndexedDB.
-- O service worker é uma fundação de cache simples; uma estratégia completa de offline será tratada no Lote 11.
+- O save usa `localStorage` como cópia principal e espelho de um slot ativo em IndexedDB; múltiplos slots e recuperação avançada continuam pendentes.
+- O service worker usa cache progressivo de recursos visitados; a verificação de recuperação offline no deploy continua pendente.
 - O cabeçalho usa uma trava tipográfica temporária porque o PNG citado não está disponível no diretório local da tarefa.
 
 ### Planejado / não implementado

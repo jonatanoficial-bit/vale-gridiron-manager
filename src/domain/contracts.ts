@@ -179,6 +179,7 @@ export interface CareerProgress {
   createdAt: string
   xp: number
   reputation: number
+  gameSessions: number
   objectives: CareerObjective[]
   inbox: CareerInboxMessage[]
 }

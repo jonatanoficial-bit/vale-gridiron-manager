@@ -68,6 +68,7 @@ export function createCareerProgress(profile: CoachProfile): CareerProgress {
     createdAt: new Date().toISOString(),
     xp: 100,
     reputation: 0,
+    gameSessions: 0,
     objectives: initialObjectives(),
     inbox: initialInbox(),
   }
@@ -80,8 +81,9 @@ export function loadCareerProgress(): CareerProgress | null {
     const parsed = JSON.parse(saved) as Partial<CareerProgress>
     if (parsed.schemaVersion !== 1 || !Array.isArray(parsed.objectives) || !Array.isArray(parsed.inbox)) return null
     const progress = parsed as CareerProgress
-    if (progress.objectives.some((objective) => objective.id === 'football-plan')) return progress
-    return { ...progress, objectives: [...progress.objectives, initialObjectives().find((objective) => objective.id === 'football-plan')!] }
+    const withSessions = { ...progress, gameSessions: typeof progress.gameSessions === 'number' ? progress.gameSessions : 0 }
+    if (withSessions.objectives.some((objective) => objective.id === 'football-plan')) return withSessions
+    return { ...withSessions, objectives: [...withSessions.objectives, initialObjectives().find((objective) => objective.id === 'football-plan')!] }
   } catch {
     return null
   }
@@ -127,6 +129,27 @@ export function completeCareerObjective(progress: CareerProgress, objectiveId: C
     reputation: progress.reputation + objective.rewardReputation,
     objectives: progress.objectives.map((item) => item.id === objectiveId ? completedObjective : item),
     inbox: [completionMessage(objective), ...progress.inbox],
+  }
+}
+
+export function registerCareerGameSession(progress: CareerProgress): CareerProgress {
+  const nextSessions = progress.gameSessions + 1
+  const bonusXp = 25
+  const milestone = nextSessions % 5 === 0
+  return {
+    ...progress,
+    gameSessions: nextSessions,
+    xp: progress.xp + bonusXp,
+    reputation: progress.reputation + (milestone ? 1 : 0),
+    inbox: [{
+      id: `career-game-session-${nextSessions}`,
+      category: 'career',
+      title: milestone ? 'Marco de preparação atingido' : 'Sessão tática concluída',
+      body: milestone
+        ? `${nextSessions} sessões táticas registradas. Você ganhou ${bonusXp} XP e 1 ponto de reputação no perfil do usuário.`
+        : `A transmissão foi concluída e registrada no seu dossiê local. Você ganhou ${bonusXp} XP de desenvolvimento.`,
+      read: false,
+    }, ...progress.inbox],
   }
 }
 

@@ -1,6 +1,18 @@
+const CACHE_NAME = 'vale-gridiron-manager-shell-v1'
+
 self.addEventListener('install', () => self.skipWaiting())
-self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()))
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(self.clients.claim())
+})
+
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET' || new URL(event.request.url).origin !== self.location.origin) return
-  event.respondWith(caches.match(event.request).then((cached) => cached || fetch(event.request)))
+  event.respondWith(caches.match(event.request).then((cached) => {
+    const network = fetch(event.request).then((response) => {
+      if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()))
+      return response
+    }).catch(() => cached)
+    return cached || network
+  }))
 })
