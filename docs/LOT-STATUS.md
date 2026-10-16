@@ -1,5 +1,17 @@
 # Status dos lotes
 
+## Ciclo de produção 13 — carreira semanal e recuperação de save
+
+- Semana de desenvolvimento local conecta treino, scouting e partida tática em três checkpoints persistentes.
+- A recompensa é fixa (60 XP e 1 reputação) e só é liberada após os três checkpoints; não há compra, sorteio ou recompensa aleatória.
+- O ciclo declara explicitamente que não equivale a semana, rodada ou resultado de competição real.
+- O Cofre de Save agora lê o último espelho compatível do IndexedDB por ação explícita do usuário.
+
+### Limites preservados
+
+- Não há calendário, clube, vaga, contrato, ranking, atleta ou resultado oficial criado pelo ciclo.
+- Slots nomeados, recuperação automática com comparação de versão e sincronização em nuvem continuam fora deste ciclo.
+
 ## Lotes 10, 11 e 12 — integração parcial, com evidência
 
 - UX de transmissão com campo cinematográfico neutro, HUD de clubes e piloto tático que pausa em cenários críticos.

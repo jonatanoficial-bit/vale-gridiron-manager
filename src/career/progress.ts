@@ -1,6 +1,12 @@
-import type { CareerInboxMessage, CareerObjective, CareerProgress, CoachProfile } from '../domain/contracts'
+import type { CareerCheckpointId, CareerInboxMessage, CareerObjective, CareerProgress, CoachProfile } from '../domain/contracts'
 
 export const CAREER_PROGRESS_KEY = 'vale-gridiron-manager:career-progress:v1'
+
+const CHECKPOINTS: CareerCheckpointId[] = ['training', 'scouting', 'match']
+
+function initialDevelopmentWeek() {
+  return { number: 1, completedCheckpoints: [] as CareerCheckpointId[] }
+}
 
 function initialInbox(): CareerInboxMessage[] {
   return [
@@ -69,6 +75,7 @@ export function createCareerProgress(profile: CoachProfile): CareerProgress {
     xp: 100,
     reputation: 0,
     gameSessions: 0,
+    developmentWeek: initialDevelopmentWeek(),
     objectives: initialObjectives(),
     inbox: initialInbox(),
   }
@@ -80,13 +87,26 @@ export function loadCareerProgress(): CareerProgress | null {
     if (!saved) return null
     const parsed = JSON.parse(saved) as Partial<CareerProgress>
     if (parsed.schemaVersion !== 1 || !Array.isArray(parsed.objectives) || !Array.isArray(parsed.inbox)) return null
-    const progress = parsed as CareerProgress
-    const withSessions = { ...progress, gameSessions: typeof progress.gameSessions === 'number' ? progress.gameSessions : 0 }
-    if (withSessions.objectives.some((objective) => objective.id === 'football-plan')) return withSessions
-    return { ...withSessions, objectives: [...withSessions.objectives, initialObjectives().find((objective) => objective.id === 'football-plan')!] }
+    return normalizeCareerProgress(parsed as CareerProgress)
   } catch {
     return null
   }
+}
+
+export function normalizeCareerProgress(progress: CareerProgress): CareerProgress {
+  const withSessions = { ...progress, gameSessions: typeof progress.gameSessions === 'number' ? progress.gameSessions : 0 }
+  const completedCheckpoints = Array.isArray(progress.developmentWeek?.completedCheckpoints)
+    ? progress.developmentWeek.completedCheckpoints.filter((checkpoint): checkpoint is CareerCheckpointId => CHECKPOINTS.includes(checkpoint as CareerCheckpointId))
+    : []
+  const withWeek = {
+    ...withSessions,
+    developmentWeek: {
+      number: typeof progress.developmentWeek?.number === 'number' && progress.developmentWeek.number > 0 ? progress.developmentWeek.number : 1,
+      completedCheckpoints,
+    },
+  }
+  if (withWeek.objectives.some((objective) => objective.id === 'football-plan')) return withWeek
+  return { ...withWeek, objectives: [...withWeek.objectives, initialObjectives().find((objective) => objective.id === 'football-plan')!] }
 }
 
 export function saveCareerProgress(progress: CareerProgress) {
@@ -148,6 +168,54 @@ export function registerCareerGameSession(progress: CareerProgress): CareerProgr
       body: milestone
         ? `${nextSessions} sessões táticas registradas. Você ganhou ${bonusXp} XP e 1 ponto de reputação no perfil do usuário.`
         : `A transmissão foi concluída e registrada no seu dossiê local. Você ganhou ${bonusXp} XP de desenvolvimento.`,
+      read: false,
+    }, ...progress.inbox],
+  }
+}
+
+const checkpointCopy: Record<CareerCheckpointId, Omit<CareerInboxMessage, 'id' | 'read'>> = {
+  training: {
+    category: 'career',
+    title: 'Treino registrado no ciclo',
+    body: 'A sessão do plano local foi marcada na semana de desenvolvimento. Isso não cria atletas, clube ou calendário oficial.',
+  },
+  scouting: {
+    category: 'career',
+    title: 'Scouting registrado no ciclo',
+    body: 'A leitura do mercado foi marcada na semana de desenvolvimento. O insight segue sem gerar prospects ou propostas.',
+  },
+  match: {
+    category: 'career',
+    title: 'Partida tática registrada no ciclo',
+    body: 'A transmissão concluída foi marcada na semana de desenvolvimento. O placar não é anexado a uma competição real.',
+  },
+}
+
+export function registerCareerCheckpoint(progress: CareerProgress, checkpoint: CareerCheckpointId): CareerProgress {
+  if (progress.developmentWeek.completedCheckpoints.includes(checkpoint)) return progress
+  return {
+    ...progress,
+    developmentWeek: {
+      ...progress.developmentWeek,
+      completedCheckpoints: [...progress.developmentWeek.completedCheckpoints, checkpoint],
+    },
+    inbox: [{ id: `career-week-${progress.developmentWeek.number}-${checkpoint}`, ...checkpointCopy[checkpoint], read: false }, ...progress.inbox],
+  }
+}
+
+export function completeCareerDevelopmentWeek(progress: CareerProgress): CareerProgress {
+  if (!CHECKPOINTS.every((checkpoint) => progress.developmentWeek.completedCheckpoints.includes(checkpoint))) return progress
+  const completedWeek = progress.developmentWeek.number
+  return {
+    ...progress,
+    xp: progress.xp + 60,
+    reputation: progress.reputation + 1,
+    developmentWeek: { number: completedWeek + 1, completedCheckpoints: [] },
+    inbox: [{
+      id: `career-week-${completedWeek}-complete`,
+      category: 'career',
+      title: `Semana de desenvolvimento ${completedWeek} concluída`,
+      body: 'Você ganhou 60 XP e 1 ponto de reputação pelo ciclo local completo. A recompensa não representa uma temporada, ranking ou emprego real.',
       read: false,
     }, ...progress.inbox],
   }

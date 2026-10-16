@@ -22,10 +22,10 @@ import {
   ROSTER_COVERAGE_2026,
   positionGroups,
 } from './data/roster-2026'
-import type { CareerObjective, CareerProgress, CatalogSelection, CoachProfile, GameMode, OperationsPlan, Route } from './domain/contracts'
-import { completeCareerObjective, createCareerProgress, loadCareerProgress, registerCareerGameSession, saveCareerProgress, unreadCareerMessages } from './career/progress'
+import type { CareerCheckpointId, CareerObjective, CareerProgress, CatalogSelection, CoachProfile, GameMode, OperationsPlan, Route } from './domain/contracts'
+import { completeCareerDevelopmentWeek, completeCareerObjective, createCareerProgress, loadCareerProgress, normalizeCareerProgress, registerCareerCheckpoint, registerCareerGameSession, saveCareerProgress, unreadCareerMessages } from './career/progress'
 import { loadCatalogSelection, loadCoachProfile, saveCatalogSelection, saveCoachProfile } from './lib/persistence'
-import { makeSaveBundle, mirrorSaveBundle, parseSaveBundle } from './lib/save-vault'
+import { loadMirroredSaveBundle, makeSaveBundle, mirrorSaveBundle, parseSaveBundle } from './lib/save-vault'
 import {
   defensiveIdentityLabel,
   loadOperationsPlan,
@@ -144,10 +144,29 @@ function App() {
   function registerCareerGame() {
     if (!careerProgress) return
     const objectiveProgress = completeCareerObjective(careerProgress, 'match-review')
-    const nextProgress = registerCareerGameSession(objectiveProgress)
+    const sessionProgress = registerCareerGameSession(objectiveProgress)
+    const nextProgress = registerCareerCheckpoint(sessionProgress, 'match')
     saveCareerProgress(nextProgress)
     setCareerProgress(nextProgress)
     setLastSaved('Partida e recompensa de carreira salvas neste navegador')
+  }
+
+  function recordCareerCheckpoint(checkpoint: CareerCheckpointId) {
+    if (!careerProgress) return
+    const nextProgress = registerCareerCheckpoint(careerProgress, checkpoint)
+    if (nextProgress === careerProgress) return
+    saveCareerProgress(nextProgress)
+    setCareerProgress(nextProgress)
+    setLastSaved('Etapa do ciclo de desenvolvimento salva neste navegador')
+  }
+
+  function completeDevelopmentWeek() {
+    if (!careerProgress) return
+    const nextProgress = completeCareerDevelopmentWeek(careerProgress)
+    if (nextProgress === careerProgress) return
+    saveCareerProgress(nextProgress)
+    setCareerProgress(nextProgress)
+    setLastSaved('Semana de desenvolvimento concluída e salva neste navegador')
   }
 
   function persistOperations(nextPlan: OperationsPlan, message = 'Plano de futebol salvo neste navegador') {
@@ -177,14 +196,34 @@ function App() {
       }
       setProfile(bundle.profile)
       setCatalogSelection(bundle.catalogSelection)
-      setCareerProgress(bundle.careerProgress)
+      const restoredProgress = bundle.careerProgress ? normalizeCareerProgress(bundle.careerProgress) : null
+      setCareerProgress(restoredProgress)
       setOperationsPlan(bundle.operationsPlan)
       saveCoachProfile(bundle.profile)
       saveCatalogSelection(bundle.catalogSelection)
-      if (bundle.careerProgress) saveCareerProgress(bundle.careerProgress)
+      if (restoredProgress) saveCareerProgress(restoredProgress)
       saveOperationsPlan(bundle.operationsPlan)
       void mirrorSaveBundle(bundle)
       setLastSaved('Save importado e espelhado neste navegador')
+    })
+  }
+
+  function restoreMirroredSave() {
+    void loadMirroredSaveBundle().then((bundle) => {
+      if (!bundle) {
+        setLastSaved('Nenhum espelho de save compatível foi encontrado neste navegador')
+        return
+      }
+      setProfile(bundle.profile)
+      setCatalogSelection(bundle.catalogSelection)
+      const restoredProgress = bundle.careerProgress ? normalizeCareerProgress(bundle.careerProgress) : null
+      setCareerProgress(restoredProgress)
+      setOperationsPlan(bundle.operationsPlan)
+      saveCoachProfile(bundle.profile)
+      saveCatalogSelection(bundle.catalogSelection)
+      if (restoredProgress) saveCareerProgress(restoredProgress)
+      saveOperationsPlan(bundle.operationsPlan)
+      setLastSaved('Espelho de save recuperado neste navegador')
     })
   }
 
@@ -201,18 +240,18 @@ function App() {
       <main id="conteudo" className="app-content">
         {route === 'inicio' && <Lobby onNavigate={handleNavigation} coverageLabel={coverageLabel} />}
         {route === 'carreira' && (
-          <Career profile={profile} progress={careerProgress} onChange={setProfile} onSave={persistProfile} onCreateDossier={beginCareerDossier} onAdvanceObjective={advanceCareerObjective} onNavigate={handleNavigation} />
+          <Career profile={profile} progress={careerProgress} onChange={setProfile} onSave={persistProfile} onCreateDossier={beginCareerDossier} onAdvanceObjective={advanceCareerObjective} onCompleteDevelopmentWeek={completeDevelopmentWeek} onNavigate={handleNavigation} />
         )}
         {route === 'temporada' && <Sandbox selection={catalogSelection} onSave={persistCatalogSelection} onNavigate={handleNavigation} />}
         {route === 'elenco' && <RosterDatabase />}
         {route === 'jogoUnico' && <SingleGame selectedFranchiseId={catalogSelection.franchiseId} operationsPlan={operationsPlan} onGameFinalized={registerCareerGame} />}
-        {route === 'gestao' && <OperationsCenter plan={operationsPlan} onChange={persistOperations} onNavigate={handleNavigation} />}
+        {route === 'gestao' && <OperationsCenter plan={operationsPlan} onChange={persistOperations} onCareerCheckpoint={recordCareerCheckpoint} onNavigate={handleNavigation} />}
         {route === 'banco' && <ContentDatabase />}
-        {route === 'configuracoes' && <Settings profile={profile} onChange={setProfile} onSave={persistProfile} onExport={exportSave} onImport={importSave} />}
+        {route === 'configuracoes' && <Settings profile={profile} onChange={setProfile} onSave={persistProfile} onExport={exportSave} onImport={importSave} onRestore={restoreMirroredSave} />}
       </main>
 
       <footer className="app-footer">
-        <span>LOTES 01–12 · INTEGRAÇÃO EM PROGRESSO</span>
+        <span>LOTES 01–13 · INTEGRAÇÃO EM PROGRESSO</span>
         <span>VALE GRIDIRON MANAGER · protótipo independente</span>
         <span>{CONTENT_COVERAGE.catalogLabel}</span>
       </footer>
@@ -323,7 +362,7 @@ function FoundationPanel({ kicker, title, value, description, warn = false }: { 
   return <article className="foundation-panel"><p>{kicker}</p><h2>{title}</h2><strong className={warn ? 'warning' : ''}>{value}</strong><span>{description}</span></article>
 }
 
-function Career({ profile, progress, onChange, onSave, onCreateDossier, onAdvanceObjective, onNavigate }: { profile: CoachProfile; progress: CareerProgress | null; onChange: (profile: CoachProfile) => void; onSave: () => void; onCreateDossier: () => boolean; onAdvanceObjective: (objectiveId: CareerObjective['id']) => void; onNavigate: (route: Route) => void }) {
+function Career({ profile, progress, onChange, onSave, onCreateDossier, onAdvanceObjective, onCompleteDevelopmentWeek, onNavigate }: { profile: CoachProfile; progress: CareerProgress | null; onChange: (profile: CoachProfile) => void; onSave: () => void; onCreateDossier: () => boolean; onAdvanceObjective: (objectiveId: CareerObjective['id']) => void; onCompleteDevelopmentWeek: () => void; onNavigate: (route: Route) => void }) {
   const selectedAvatar = findCoachAvatar(profile.avatarId)
   const [profileSaved, setProfileSaved] = useState(false)
   const [dossierError, setDossierError] = useState(false)
@@ -366,13 +405,13 @@ function Career({ profile, progress, onChange, onSave, onCreateDossier, onAdvanc
           <button className="text-button" onClick={() => onNavigate('banco')}>CONSULTAR COBERTURA DO CATÁLOGO <span>›</span></button>
         </aside>
       </div>
-      {progress ? <CareerDossier progress={progress} onAdvanceObjective={onAdvanceObjective} onNavigate={onNavigate} /> : <section className="career-start panel" aria-labelledby="career-start-title"><div><p className="eyebrow">DOSSIÊ DE CARREIRA</p><h2 id="career-start-title">PRONTO PARA SER REGISTRADO</h2><p>O dossiê cria um save local para o técnico do usuário. Ele começa sem clube, sem contrato e sem oferta: nenhuma vaga real foi verificada nos snapshots atuais.</p>{dossierError && <strong className="form-error" role="alert">Informe o nome do técnico antes de iniciar o dossiê.</strong>}</div><button className="action-button primary" onClick={startDossier}>INICIAR DOSSIÊ <span>›</span></button></section>}
+      {progress ? <CareerDossier progress={progress} onAdvanceObjective={onAdvanceObjective} onCompleteDevelopmentWeek={onCompleteDevelopmentWeek} onNavigate={onNavigate} /> : <section className="career-start panel" aria-labelledby="career-start-title"><div><p className="eyebrow">DOSSIÊ DE CARREIRA</p><h2 id="career-start-title">PRONTO PARA SER REGISTRADO</h2><p>O dossiê cria um save local para o técnico do usuário. Ele começa sem clube, sem contrato e sem oferta: nenhuma vaga real foi verificada nos snapshots atuais.</p>{dossierError && <strong className="form-error" role="alert">Informe o nome do técnico antes de iniciar o dossiê.</strong>}</div><button className="action-button primary" onClick={startDossier}>INICIAR DOSSIÊ <span>›</span></button></section>}
       <section className="timeline panel"><div className="panel-heading"><span className="panel-icon">◌</span><div><p>FLUXO PLANEJADO</p><h2>CICLO DA SEMANA</h2></div></div><ol>{['Caixa de entrada', 'Treino', 'Plano de jogo', 'Partida', 'Relatórios'].map((step, index) => <li key={step}><span>{index + 1}</span>{step}</li>)}</ol><p className="muted">O Centro de Futebol dos Lotes 07–09 já controla treino, scouting e plano de jogo; os dados de vagas e elencos reais continuam dependentes de snapshots importados.</p></section>
     </section>
   )
 }
 
-function CareerDossier({ progress, onAdvanceObjective, onNavigate }: { progress: CareerProgress; onAdvanceObjective: (objectiveId: CareerObjective['id']) => void; onNavigate: (route: Route) => void }) {
+function CareerDossier({ progress, onAdvanceObjective, onCompleteDevelopmentWeek, onNavigate }: { progress: CareerProgress; onAdvanceObjective: (objectiveId: CareerObjective['id']) => void; onCompleteDevelopmentWeek: () => void; onNavigate: (route: Route) => void }) {
   const unread = unreadCareerMessages(progress)
 
   function objectiveAction(objective: CareerObjective) {
@@ -385,10 +424,23 @@ function CareerDossier({ progress, onAdvanceObjective, onNavigate }: { progress:
 
   return <section className="career-dossier" aria-labelledby="career-dossier-title">
     <article className="career-command panel"><div className="panel-heading"><span className="panel-icon">⌁</span><div><p>DOSSIÊ ATIVO · SAVE LOCAL</p><h2 id="career-dossier-title">CENTRAL DA CARREIRA</h2></div></div><div className="career-metrics"><div><span>NÍVEL</span><strong>{1 + Math.floor(progress.xp / 200)}</strong></div><div><span>XP</span><strong>{progress.xp}</strong></div><div><span>REPUTAÇÃO</span><strong>{progress.reputation}<small>/100</small></strong></div><div><span>SESSÕES</span><strong>{progress.gameSessions}</strong></div><div><span>CLUBE ATUAL</span><strong>—</strong></div></div><CareerRewardTrack xp={progress.xp} /><p className="career-disclaimer">XP e reputação são um modelo interno de progresso do usuário, sem compras ou bônus aleatórios. Sem vaga confirmada, o save não atribui clube, contrato, salário ou entrevista a uma organização real.</p></article>
+    <CareerDevelopmentWeekPanel progress={progress} onComplete={onCompleteDevelopmentWeek} onNavigate={onNavigate} />
     <article className="career-objectives panel"><div className="panel-heading"><span className="panel-icon">◎</span><div><p>PLANO DE DESENVOLVIMENTO</p><h2>OBJETIVOS ATIVOS</h2></div></div>{progress.objectives.map((objective) => <div className={`career-objective ${objective.state}`} key={objective.id}><span>{objective.state === 'complete' ? '✓' : objective.state === 'blocked' ? '!' : '○'}</span><div><strong>{objective.label}</strong><p>{objective.detail}</p><small>+{objective.rewardXp} XP · +{objective.rewardReputation} REP</small></div>{objectiveAction(objective)}</div>)}</article>
     <article className="career-inbox panel"><div className="panel-heading"><span className="panel-icon">✉</span><div><p>INBOX · {unread} NOVAS</p><h2>MENSAGENS</h2></div></div><div className="inbox-list">{progress.inbox.slice(0, 4).map((message) => <article key={message.id} className={`inbox-message ${message.category}`}><span>{message.category === 'coverage' ? '▣' : message.category === 'career' ? '★' : 'i'}</span><div><strong>{message.title}</strong><p>{message.body}</p></div></article>)}</div></article>
     <article className="career-vacancies panel"><div className="panel-heading"><span className="panel-icon">⌂</span><div><p>MERCADO DE TRABALHO</p><h2>VAGAS REAIS</h2></div></div><strong className="vacancy-zero">0 VAGAS VERIFICADAS</strong><p>O catálogo atual não comprova uma vaga de comissão, entrevista, salário ou contrato. Nenhuma proposta é gerada como enfeite.</p><div className="vacancy-grid"><span>FBS/FCS <b>PENDENTE</b></span><span>UFL <b>PENDENTE</b></span><span>NFL <b>PENDENTE</b></span></div><button className="action-button secondary full" disabled>OFERTAS BLOQUEADAS POR COBERTURA</button></article>
   </section>
+}
+
+function CareerDevelopmentWeekPanel({ progress, onComplete, onNavigate }: { progress: CareerProgress; onComplete: () => void; onNavigate: (route: Route) => void }) {
+  const checkpoints: Array<{ id: CareerCheckpointId; label: string; detail: string; route: Route }> = [
+    { id: 'training', label: 'Treino', detail: 'Conclua uma sessão no Centro de Futebol.', route: 'gestao' },
+    { id: 'scouting', label: 'Scouting', detail: 'Rode uma leitura de scouting no Centro de Futebol.', route: 'gestao' },
+    { id: 'match', label: 'Partida tática', detail: 'Finalize uma transmissão no Jogo Único.', route: 'jogoUnico' },
+  ]
+  const completed = progress.developmentWeek.completedCheckpoints
+  const ready = checkpoints.every((checkpoint) => completed.includes(checkpoint.id))
+
+  return <article className="career-week panel"><div className="career-week-head"><div><p className="eyebrow">LOTE 13 · CICLO LOCAL</p><h2>SEMANA DE DESENVOLVIMENTO {String(progress.developmentWeek.number).padStart(2, '0')}</h2><p>Um ciclo de preparo do perfil do usuário. Não representa uma semana oficial, rodada, agenda ou resultado de qualquer competição.</p></div><div className="career-week-score"><strong>{completed.length}/3</strong><span>CHECKPOINTS</span></div></div><div className="career-week-checkpoints">{checkpoints.map((checkpoint, index) => { const isComplete = completed.includes(checkpoint.id); return <div className={isComplete ? 'is-complete' : ''} key={checkpoint.id}><span>{isComplete ? '✓' : String(index + 1).padStart(2, '0')}</span><div><strong>{checkpoint.label}</strong><small>{checkpoint.detail}</small></div>{isComplete ? <b>REGISTRADO</b> : <button className="text-button" onClick={() => onNavigate(checkpoint.route)}>ABRIR <span>›</span></button>}</div> })}</div><div className="career-week-footer"><span>{ready ? 'Ciclo completo. A recompensa é fixa e transparente.' : 'Complete treino, scouting e partida para encerrar o ciclo.'}</span><button className="action-button primary" disabled={!ready} onClick={onComplete}>ENCERRAR SEMANA · +60 XP <span>✓</span></button></div></article>
 }
 
 function CareerRewardTrack({ xp }: { xp: number }) {
@@ -422,7 +474,7 @@ function Sandbox({ selection, onSave, onNavigate }: { selection: CatalogSelectio
   </section>
 }
 
-function OperationsCenter({ plan, onChange, onNavigate }: { plan: OperationsPlan; onChange: (plan: OperationsPlan, message?: string) => void; onNavigate: (route: Route) => void }) {
+function OperationsCenter({ plan, onChange, onCareerCheckpoint, onNavigate }: { plan: OperationsPlan; onChange: (plan: OperationsPlan, message?: string) => void; onCareerCheckpoint: (checkpoint: CareerCheckpointId) => void; onNavigate: (route: Route) => void }) {
   const [desk, setDesk] = useState<'college' | 'pro' | 'performance'>('performance')
   const performanceIndex = Math.max(0, Math.min(100, Math.round(plan.readiness * 0.38 + plan.chemistry * 0.23 + plan.scoutingInsight * 0.16 + plan.operatingReserve * 0.1 - plan.fatigueRisk * 0.13)))
   const sessions = plan.entries.slice(0, 5)
@@ -450,7 +502,7 @@ function OperationsCenter({ plan, onChange, onNavigate }: { plan: OperationsPlan
 
     {desk === 'college' && <CollegeDesk plan={plan} onChange={onChange} onNavigate={onNavigate} />}
     {desk === 'pro' && <ProDesk plan={plan} onChange={onChange} onNavigate={onNavigate} />}
-    {desk === 'performance' && <PerformanceDesk plan={plan} onChange={onChange} onNavigate={onNavigate} />}
+    {desk === 'performance' && <PerformanceDesk plan={plan} onChange={onChange} onCareerCheckpoint={onCareerCheckpoint} onNavigate={onNavigate} />}
 
     <section className="operations-log panel" aria-labelledby="operations-log-title">
       <div className="panel-heading"><span className="panel-icon">◫</span><div><p>HISTÓRICO DO PLANO</p><h2 id="operations-log-title">DECISÕES REGISTRADAS</h2></div></div>
@@ -501,13 +553,13 @@ function ProDesk({ plan, onChange, onNavigate }: { plan: OperationsPlan; onChang
   </section>
 }
 
-function PerformanceDesk({ plan, onChange, onNavigate }: { plan: OperationsPlan; onChange: (plan: OperationsPlan, message?: string) => void; onNavigate: (route: Route) => void }) {
+function PerformanceDesk({ plan, onChange, onCareerCheckpoint, onNavigate }: { plan: OperationsPlan; onChange: (plan: OperationsPlan, message?: string) => void; onCareerCheckpoint: (checkpoint: CareerCheckpointId) => void; onNavigate: (route: Route) => void }) {
   return <section className="operations-desk performance-desk" aria-labelledby="performance-title">
     <div className="desk-heading"><div><p className="eyebrow">LOTE 09 · IA, TÁTICA, TREINO E GESTÃO</p><h2 id="performance-title">PLANO DE JOGO DA SEMANA</h2><p>As decisões alteram o comportamento determinístico da simulação e os indicadores locais de preparo. Elas não representam ratings, contratos ou resultados oficiais de atletas reais.</p></div><span className="status-pill partial">SIMENGINE CONECTADO</span></div>
     <div className="performance-grid">
       <article className="panel strategy-console"><div className="panel-heading"><span className="panel-icon">⌘</span><div><p>CHAMADA E CONTRACHAMADA</p><h2>IDENTIDADE TÁTICA</h2></div></div><div className="strategy-selects"><label>Ataque<select aria-label="Identidade ofensiva" value={plan.offensiveIdentity} onChange={(event) => onChange(setTacticalPlan(plan, { offensiveIdentity: event.target.value as OperationsPlan['offensiveIdentity'], defensiveIdentity: plan.defensiveIdentity, aggression: plan.aggression }), 'Identidade ofensiva salva')}><option value="balanced">Equilíbrio situacional</option><option value="air-raid">Ataque aéreo</option><option value="ground-control">Controle terrestre</option></select></label><label>Defesa<select aria-label="Identidade defensiva" value={plan.defensiveIdentity} onChange={(event) => onChange(setTacticalPlan(plan, { offensiveIdentity: plan.offensiveIdentity, defensiveIdentity: event.target.value as OperationsPlan['defensiveIdentity'], aggression: plan.aggression }), 'Identidade defensiva salva')}><option value="contain">Contenção</option><option value="pressure">Pressão</option><option value="coverage">Cobertura</option></select></label></div><label className="range-label">Agressividade <output>{plan.aggression}%</output><input aria-label="Agressividade" type="range" min="25" max="85" value={plan.aggression} onChange={(event) => onChange(setTacticalPlan(plan, { offensiveIdentity: plan.offensiveIdentity, defensiveIdentity: plan.defensiveIdentity, aggression: Number(event.target.value) }), 'Agressividade tática salva')} /></label><div className="strategy-readout"><div><span>ATAQUE</span><strong>{offensiveIdentityLabel(plan.offensiveIdentity)}</strong></div><div><span>DEFESA</span><strong>{defensiveIdentityLabel(plan.defensiveIdentity)}</strong></div><div><span>EFEITO</span><strong>SIMULAÇÃO</strong></div></div><button className="action-button primary full" onClick={() => onNavigate('jogoUnico')}>TESTAR NO JOGO ÚNICO <span>›</span></button></article>
-      <article className="panel training-console"><div className="panel-heading"><span className="panel-icon">↯</span><div><p>MICROCICLO SEMANAL</p><h2>TREINAMENTO</h2></div></div><label>Foco da sessão<select aria-label="Foco de treinamento" value={plan.trainingFocus} onChange={(event) => onChange(setTrainingPlan(plan, { trainingFocus: event.target.value as OperationsPlan['trainingFocus'], practiceIntensity: plan.practiceIntensity }), 'Foco de treinamento salvo')}><option value="recovery">Recuperação</option><option value="execution">Execução</option><option value="conditioning">Condicionamento</option><option value="cohesion">Química</option></select></label><label className="range-label">Intensidade <output>{plan.practiceIntensity}%</output><input aria-label="Intensidade de treino" type="range" min="20" max="90" value={plan.practiceIntensity} onChange={(event) => onChange(setTrainingPlan(plan, { trainingFocus: plan.trainingFocus, practiceIntensity: Number(event.target.value) }), 'Intensidade de treino salva')} /></label><div className="training-impact"><span><b className="green-dot" />Prontidão <strong>{plan.readiness}</strong></span><span><b className="red-dot" />Fadiga <strong>{plan.fatigueRisk}</strong></span><span><b className="blue-dot" />Química <strong>{plan.chemistry}</strong></span></div><p className="muted">Foco atual: {trainingFocusLabel(plan.trainingFocus)}. A sessão muda indicadores e o próximo jogo usa o plano salvo.</p><button className="action-button primary full" onClick={() => onChange(runTrainingSession(plan), 'Sessão de treino concluída e salva')}>EXECUTAR SESSÃO <span>✓</span></button></article>
-      <article className="panel scouting-console"><div className="panel-heading"><span className="panel-icon">⌁</span><div><p>INTELIGÊNCIA DE ELENCO</p><h2>SCOUTING</h2></div></div><label>Prioridade<select aria-label="Prioridade de scouting" value={plan.scoutingFocus} onChange={(event) => onChange(setScoutingFocus(plan, event.target.value as OperationsPlan['scoutingFocus']), 'Prioridade de scouting salva')}><option value="quarterback">Quarterback</option><option value="line">Linhas</option><option value="secondary">Secundária</option><option value="best-available">Melhor disponível</option></select></label><div className="scouting-radar"><div><span>INSIGHT</span><strong>{plan.scoutingInsight}</strong><small>/100</small></div><i style={{ '--radar-level': `${plan.scoutingInsight}%` } as React.CSSProperties} /></div><p className="muted">Alvo: {scoutingFocusLabel(plan.scoutingFocus)}. O ciclo só gera insight, não prospects ou relatórios fictícios.</p><button className="action-button secondary full" onClick={() => onChange(runScoutingCycle(plan), 'Ciclo de scouting concluído e salvo')}>RODAR CICLO DE SCOUTING <span>›</span></button></article>
+      <article className="panel training-console"><div className="panel-heading"><span className="panel-icon">↯</span><div><p>MICROCICLO SEMANAL</p><h2>TREINAMENTO</h2></div></div><label>Foco da sessão<select aria-label="Foco de treinamento" value={plan.trainingFocus} onChange={(event) => onChange(setTrainingPlan(plan, { trainingFocus: event.target.value as OperationsPlan['trainingFocus'], practiceIntensity: plan.practiceIntensity }), 'Foco de treinamento salvo')}><option value="recovery">Recuperação</option><option value="execution">Execução</option><option value="conditioning">Condicionamento</option><option value="cohesion">Química</option></select></label><label className="range-label">Intensidade <output>{plan.practiceIntensity}%</output><input aria-label="Intensidade de treino" type="range" min="20" max="90" value={plan.practiceIntensity} onChange={(event) => onChange(setTrainingPlan(plan, { trainingFocus: plan.trainingFocus, practiceIntensity: Number(event.target.value) }), 'Intensidade de treino salva')} /></label><div className="training-impact"><span><b className="green-dot" />Prontidão <strong>{plan.readiness}</strong></span><span><b className="red-dot" />Fadiga <strong>{plan.fatigueRisk}</strong></span><span><b className="blue-dot" />Química <strong>{plan.chemistry}</strong></span></div><p className="muted">Foco atual: {trainingFocusLabel(plan.trainingFocus)}. A sessão muda indicadores e o próximo jogo usa o plano salvo.</p><button className="action-button primary full" onClick={() => { onChange(runTrainingSession(plan), 'Sessão de treino concluída e salva'); onCareerCheckpoint('training') }}>EXECUTAR SESSÃO <span>✓</span></button></article>
+      <article className="panel scouting-console"><div className="panel-heading"><span className="panel-icon">⌁</span><div><p>INTELIGÊNCIA DE ELENCO</p><h2>SCOUTING</h2></div></div><label>Prioridade<select aria-label="Prioridade de scouting" value={plan.scoutingFocus} onChange={(event) => onChange(setScoutingFocus(plan, event.target.value as OperationsPlan['scoutingFocus']), 'Prioridade de scouting salva')}><option value="quarterback">Quarterback</option><option value="line">Linhas</option><option value="secondary">Secundária</option><option value="best-available">Melhor disponível</option></select></label><div className="scouting-radar"><div><span>INSIGHT</span><strong>{plan.scoutingInsight}</strong><small>/100</small></div><i style={{ '--radar-level': `${plan.scoutingInsight}%` } as React.CSSProperties} /></div><p className="muted">Alvo: {scoutingFocusLabel(plan.scoutingFocus)}. O ciclo só gera insight, não prospects ou relatórios fictícios.</p><button className="action-button secondary full" onClick={() => { onChange(runScoutingCycle(plan), 'Ciclo de scouting concluído e salvo'); onCareerCheckpoint('scouting') }}>RODAR CICLO DE SCOUTING <span>›</span></button></article>
       <article className="panel club-console"><div className="panel-heading"><span className="panel-icon">▦</span><div><p>DIRETORIA E INSTALAÇÕES</p><h2>GESTÃO DO CLUBE</h2></div></div><div className="facility-choices" role="group" aria-label="Prioridade de instalações"><button className={plan.facilityPriority === 'medical' ? 'is-active' : ''} onClick={() => onChange(setFacilityPriority(plan, 'medical'), 'Prioridade médica salva')}>MÉDICO</button><button className={plan.facilityPriority === 'performance' ? 'is-active' : ''} onClick={() => onChange(setFacilityPriority(plan, 'performance'), 'Prioridade de performance salva')}>PERFORMANCE</button><button className={plan.facilityPriority === 'analysis' ? 'is-active' : ''} onClick={() => onChange(setFacilityPriority(plan, 'analysis'), 'Prioridade analítica salva')}>ANÁLISE</button></div><div className="club-model"><div><span>PRIORIDADE</span><strong>{plan.facilityPriority.toUpperCase()}</strong></div><div><span>RESERVA</span><strong>{plan.operatingReserve}<small>/100</small></strong></div></div><p className="muted">Receitas, estádio e patrocínios reais exigem fontes por clube. Este painel usa apenas alocação interna do modelo.</p></article>
     </div>
     <article className="plan-impact panel"><span>✓</span><div><strong>Decisões com efeito mensurável</strong><p>O SimEngine recebe identidade ofensiva, defensiva, agressividade, prontidão, fadiga e química. A mesma seed com o mesmo plano permanece reproduzível; mudar o plano altera o EventLog e as estatísticas projetadas.</p></div></article>
@@ -678,8 +730,8 @@ function ContentDatabase() {
   return <section className="route-page" aria-labelledby="database-title"><PageHeading eyebrow="BANCO DE DADOS · LOTES 02–05" title="INVENTÁRIO REAL 2026" copy="Cada registro mostra fonte, data de corte e cobertura por campo. O catálogo não preenche nenhuma ausência com universidades, atletas, técnicos, escudos ou uniformes fictícios." /><div className="coverage-hero panel"><div><p className="eyebrow">SNAPSHOTS REGISTRADOS</p><h2>{CONTENT_COVERAGE.catalogLabel}</h2><p>{CONTENT_COVERAGE.sourceMessage}</p><div className="snapshot-chips">{LEAGUE_SNAPSHOTS_2026.map((snapshot) => <span className={`status-chip ${snapshot.coverageStatus}`} key={snapshot.seasonId}>{snapshot.leagueName} · {snapshot.coverageStatus}</span>)}</div></div><div className="coverage-score"><strong>{CONTENT_COVERAGE.completedFields}<small>/{CONTENT_COVERAGE.totalFields}</small></strong><span>frentes estruturais</span></div></div><div className="coverage-table panel"><div className="table-head"><span>CAMADA</span><span>STATUS</span><span>PRÓXIMA AÇÃO</span></div>{CONTENT_COVERAGE.layers.map((layer) => <div className="table-row" key={layer.name}><strong>{layer.name}</strong><span className={`status-pill ${layer.status}`}>{layer.status === 'pending' ? 'PENDENTE' : layer.status === 'partial' ? 'PARCIAL' : 'PRONTO'}</span><span>{layer.nextAction}</span></div>)}</div><section className="catalog-section panel" aria-labelledby="franchises-title"><div className="section-heading"><div><p className="eyebrow">IDENTIFICAÇÃO VERIFICADA</p><h2 id="franchises-title">FRANQUIAS REGISTRADAS</h2></div><div className="catalog-filter" role="group" aria-label="Filtrar franquias"><button className={leagueFilter === 'all' ? 'is-selected' : ''} onClick={() => setLeagueFilter('all')}>TODAS ({NFL_2026_FRANCHISES.length + UFL_2026_FRANCHISES.length})</button><button className={leagueFilter === 'nfl' ? 'is-selected' : ''} onClick={() => setLeagueFilter('nfl')}>NFL (32)</button><button className={leagueFilter === 'ufl' ? 'is-selected' : ''} onClick={() => setLeagueFilter('ufl')}>UFL (8)</button></div></div><div className="franchise-grid">{franchises.map((franchise) => <article className="franchise-row" key={franchise.id}><div className="franchise-mark">{franchise.name.split(' ').map((part) => part[0]).join('').slice(0, 3)}</div><div><strong>{franchise.name}</strong><span>{franchise.leagueId.toUpperCase()} {franchise.conference ? `· ${franchise.conference} ${franchise.division}` : '· liga única 2026'}</span></div><span className="status-pill ready">ID</span><span className="franchise-source">{franchise.sourceIds.map((sourceId) => sourceById.get(sourceId)?.label.split(' · ')[0]).filter(Boolean).join(' · ')}</span></article>)}</div><p className="catalog-note">Identidades e os escudos registrados dos catálogos NFL/UFL estão disponíveis. Uniformes, fotos, atletas, coaches e contratos continuam cobertos apenas quando cada fonte for importada.</p></section><section className="rules-grid" aria-label="Regras por competição">{RULESETS_2026.map((ruleset) => <article className="ruleset-card panel" key={ruleset.id}><div className="ruleset-top"><span className={`status-pill ${ruleset.coverageStatus}`}>{ruleset.coverageStatus === 'ready' ? 'PRONTO' : ruleset.coverageStatus === 'partial' ? 'PARCIAL' : 'PENDENTE'}</span><small>{ruleset.seasonId}</small></div><h2>{ruleset.displayName}</h2><ul>{ruleset.facts.map((fact) => <li key={fact}>{fact}</li>)}</ul><div className="source-links">{ruleset.sourceIds.map((sourceId) => { const source = sourceById.get(sourceId); return source ? <a key={source.id} href={source.url} target="_blank" rel="noreferrer">FONTE ↗</a> : null })}</div></article>)}</section><section className="coverage-report panel" aria-labelledby="report-title"><div className="section-heading"><div><p className="eyebrow">RELATÓRIO POR CAMPO</p><h2 id="report-title">COBERTURA DO SNAPSHOT</h2></div><span className="cutoff-label">CORTE · 11 OUT 2026</span></div>{reports.map((report) => <article className="report-row" key={report.leagueId}><header><div><strong>{report.label}</strong><span>{report.snapshotId}</span></div><div className="report-sources">{report.sourceIds.map((sourceId) => { const source = sourceById.get(sourceId); return source ? <a key={source.id} href={source.url} target="_blank" rel="noreferrer">{source.label}</a> : null })}</div></header><div className="metric-grid">{report.metrics.map((metric) => { const percent = metric.expected ? Math.round((metric.completed / metric.expected) * 100) : 0; return <div className="metric" key={metric.field}><div><span>{metric.field}</span><strong>{metric.expected ? `${metric.completed}/${metric.expected}` : 'aguardando'}</strong></div><div className="metric-track"><i className={metric.status} style={{ width: `${percent}%` }} /></div></div> })}</div></article>)}</section><section className="catalog-bottom-grid"><article className="calendar-card panel"><p className="eyebrow">CALENDÁRIO IMPORTADO</p><h2>UFL · MARCOS 2026</h2>{CALENDAR_MILESTONES_2026.map((milestone) => <div className="milestone" key={milestone.id}><strong>{milestone.dateLabel}</strong><div><span>{milestone.label}</span><small>{milestone.detail}</small></div></div>)}<p className="muted">A tabela completa de 43 jogos ainda não foi adicionada ao bundle; o relatório mantém essa diferença visível.</p></article><article className="career-card panel"><p className="eyebrow">CENÁRIOS DE CARREIRA</p><h2>CAMINHO SEM ATALHOS</h2>{CAREER_SCENARIOS_2026.map((scenario) => <div className="career-scenario" key={scenario.id}><span className={`status-pill ${scenario.status}`}>{scenario.status === 'partial' ? 'PARCIAL' : 'PENDENTE'}</span><div><strong>{scenario.label}</strong><p>{scenario.requirement}</p></div></div>)}</article></section><div className="data-principles"><article><span>01</span><h2>SEM IDENTIDADES FICTÍCIAS</h2><p>Times, atletas, técnicos, uniformes e logos só entram após o registro correspondente.</p></article><article><span>02</span><h2>SNAPSHOT VERSIONADO</h2><p>Cada entrada fixa liga, temporada, fonte, data de corte e o status de cobertura.</p></article><article><span>03</span><h2>MODELO ≠ DADO OFICIAL</h2><p>Ratings futuros serão parâmetros de simulação, jamais estatística oficial declarada.</p></article></div></section>
 }
 
-function Settings({ profile, onChange, onSave, onExport, onImport }: { profile: CoachProfile; onChange: (profile: CoachProfile) => void; onSave: () => void; onExport: () => void; onImport: (file: File) => void }) {
-  return <section className="route-page settings-page" aria-labelledby="settings-title"><PageHeading eyebrow="AJUSTES · LOTE 11" title="PREFERÊNCIAS E SAVE" copy="Perfil, temporada, operações e carreira ficam salvos localmente e são espelhados em IndexedDB quando o navegador oferece suporte. Você também pode levar um arquivo de save consigo." /><div className="settings-grid"><article className="panel"><p className="eyebrow">ACESSIBILIDADE</p><h2>EXPERIÊNCIA VISUAL</h2><label className="toggle-row"><span>Reduzir animações</span><input type="checkbox" checked={profile.reduceMotion} onChange={(event) => onChange({ ...profile, reduceMotion: event.target.checked })} /></label><p className="muted">A preferência respeita o controle do usuário. O sistema também segue as configurações de movimento reduzido do dispositivo.</p></article><article className="panel save-vault-panel"><p className="eyebrow">PERSISTÊNCIA</p><h2>COFRE DE SAVE</h2><p className="muted">Auto-save em localStorage com espelho no IndexedDB. O arquivo exportado contém somente escolhas e progresso local, sem dados ocultos de atletas ou clubes.</p><div className="save-actions"><button className="action-button primary" onClick={onSave}>SALVAR AGORA <span>✓</span></button><button className="action-button secondary" onClick={onExport}>EXPORTAR SAVE <span>↓</span></button><label className="action-button secondary import-save-button">IMPORTAR SAVE <span>↑</span><input type="file" accept="application/json" onChange={(event) => { const file = event.currentTarget.files?.[0]; if (file) onImport(file); event.currentTarget.value = '' }} /></label></div></article></div></section>
+function Settings({ profile, onChange, onSave, onExport, onImport, onRestore }: { profile: CoachProfile; onChange: (profile: CoachProfile) => void; onSave: () => void; onExport: () => void; onImport: (file: File) => void; onRestore: () => void }) {
+  return <section className="route-page settings-page" aria-labelledby="settings-title"><PageHeading eyebrow="AJUSTES · LOTE 13" title="PREFERÊNCIAS E SAVE" copy="Perfil, temporada, operações e carreira ficam salvos localmente e são espelhados em IndexedDB quando o navegador oferece suporte. Você também pode levar ou recuperar um arquivo de save." /><div className="settings-grid"><article className="panel"><p className="eyebrow">ACESSIBILIDADE</p><h2>EXPERIÊNCIA VISUAL</h2><label className="toggle-row"><span>Reduzir animações</span><input type="checkbox" checked={profile.reduceMotion} onChange={(event) => onChange({ ...profile, reduceMotion: event.target.checked })} /></label><p className="muted">A preferência respeita o controle do usuário. O sistema também segue as configurações de movimento reduzido do dispositivo.</p></article><article className="panel save-vault-panel"><p className="eyebrow">PERSISTÊNCIA</p><h2>COFRE DE SAVE</h2><p className="muted">Auto-save em localStorage com espelho no IndexedDB. Recupere o último espelho apenas neste navegador; ele substitui as escolhas locais atuais. O arquivo exportado contém somente escolhas e progresso local, sem dados ocultos de atletas ou clubes.</p><div className="save-actions"><button className="action-button primary" onClick={onSave}>SALVAR AGORA <span>✓</span></button><button className="action-button secondary" onClick={onRestore}>RECUPERAR ESPELHO <span>↻</span></button><button className="action-button secondary" onClick={onExport}>EXPORTAR SAVE <span>↓</span></button><label className="action-button secondary import-save-button">IMPORTAR SAVE <span>↑</span><input type="file" accept="application/json" onChange={(event) => { const file = event.currentTarget.files?.[0]; if (file) onImport(file); event.currentTarget.value = '' }} /></label></div></article></div></section>
 }
 
 function RosterDatabase() {

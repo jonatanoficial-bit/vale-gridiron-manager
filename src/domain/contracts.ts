@@ -171,6 +171,13 @@ export interface CareerInboxMessage {
   read: boolean
 }
 
+export type CareerCheckpointId = 'training' | 'scouting' | 'match'
+
+export interface CareerDevelopmentWeek {
+  number: number
+  completedCheckpoints: CareerCheckpointId[]
+}
+
 export interface CareerProgress {
   id: string
   schemaVersion: 1
@@ -180,6 +187,7 @@ export interface CareerProgress {
   xp: number
   reputation: number
   gameSessions: number
+  developmentWeek: CareerDevelopmentWeek
   objectives: CareerObjective[]
   inbox: CareerInboxMessage[]
 }

@@ -1,4 +1,4 @@
-# Matriz de testes - Lotes 01–12
+# Matriz de testes - Lotes 01–13
 
 | Área | Evidência atual | Comando |
 | --- | --- | --- |
@@ -15,6 +15,8 @@
 | SimEngine Lote 04 | Determinismo por seed, `snap` antes da ação, pontos apenas por eventos de pontuação e fim de partida | `pnpm test` |
 | Transmissão Lote 05 | Campo Canvas consome estado do motor; o App abre a partida e mostra EventLog/placar | `pnpm test` |
 | Carreira Lote 06 | Dossiê do usuário nasce sem clube/vaga inventada e objetivos só recompensam uma vez | `pnpm test` |
+| Ciclo local Lote 13 | Treino, scouting e partida são necessários para encerrar uma semana de desenvolvimento; cada checkpoint só conta uma vez | `pnpm test` |
+| Recuperação Lote 13 | Contrato do bundle de save é validado antes de importação/recuperação | `pnpm test` |
 | Universidade Lote 07 | Pipeline de recrutamento, portal, elegibilidade e pós-temporada informa lacunas sem gerar universidades ou atletas | revisão de UI + `pnpm test` |
 | Profissional Lote 08 | Front office separa o ciclo profissional; cap, trades, waivers e contratos ficam bloqueados sem dados importados | revisão de UI + `pnpm test` |
 | Tática e gestão Lote 09 | Plano persistente altera treino/scouting e entra no SimEngine sem perder determinismo | `pnpm test` |

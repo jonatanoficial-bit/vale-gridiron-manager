@@ -37,16 +37,44 @@ export async function mirrorSaveBundle(bundle: SaveBundle) {
   })
 }
 
+export async function loadMirroredSaveBundle() {
+  const database = await openVault()
+  if (!database) return null
+  return new Promise<SaveBundle | null>((resolve) => {
+    const transaction = database.transaction(STORE_NAME, 'readonly')
+    const request = transaction.objectStore(STORE_NAME).get(ACTIVE_SLOT)
+    request.onsuccess = () => {
+      database.close()
+      resolve(isSaveBundle(request.result) ? request.result : null)
+    }
+    request.onerror = () => {
+      database.close()
+      resolve(null)
+    }
+  })
+}
+
 export function makeSaveBundle(profile: CoachProfile, catalogSelection: CatalogSelection, careerProgress: CareerProgress | null, operationsPlan: OperationsPlan): SaveBundle {
   return { schemaVersion: 1, exportedAt: new Date().toISOString(), profile, catalogSelection, careerProgress, operationsPlan }
 }
 
 export function parseSaveBundle(value: string): SaveBundle | null {
   try {
-    const parsed = JSON.parse(value) as Partial<SaveBundle>
-    if (parsed.schemaVersion !== 1 || !parsed.profile || !parsed.catalogSelection || !parsed.operationsPlan) return null
-    return parsed as SaveBundle
+    const parsed = JSON.parse(value)
+    return isSaveBundle(parsed) ? parsed : null
   } catch {
     return null
   }
+}
+
+function isSaveBundle(value: unknown): value is SaveBundle {
+  if (!value || typeof value !== 'object') return false
+  const parsed = value as Partial<SaveBundle>
+  return parsed.schemaVersion === 1
+    && typeof parsed.exportedAt === 'string'
+    && Boolean(parsed.profile)
+    && Boolean(parsed.catalogSelection)
+    && Boolean(parsed.operationsPlan)
+    && Object.prototype.hasOwnProperty.call(parsed, 'careerProgress')
+    && (parsed.careerProgress === null || typeof parsed.careerProgress === 'object')
 }
