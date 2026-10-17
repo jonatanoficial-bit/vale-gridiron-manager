@@ -4,6 +4,15 @@ const DATABASE_NAME = 'vale-gridiron-manager'
 const STORE_NAME = 'save-slots'
 const ACTIVE_SLOT = 'active'
 
+export const NAMED_SAVE_SLOTS = [
+  { id: 'slot-1', label: 'ARQUIVO 01' },
+  { id: 'slot-2', label: 'ARQUIVO 02' },
+  { id: 'slot-3', label: 'ARQUIVO 03' },
+] as const
+
+export type NamedSaveSlotId = typeof NAMED_SAVE_SLOTS[number]['id']
+type SaveSlotId = typeof ACTIVE_SLOT | NamedSaveSlotId
+
 export interface SaveBundle {
   schemaVersion: 1
   exportedAt: string
@@ -11,6 +20,16 @@ export interface SaveBundle {
   catalogSelection: CatalogSelection
   careerProgress: CareerProgress | null
   operationsPlan: OperationsPlan
+}
+
+export interface SaveSlotSummary {
+  id: NamedSaveSlotId
+  label: string
+  hasSave: boolean
+  exportedAt: string | null
+  coachName: string | null
+  level: number | null
+  developmentWeek: number | null
 }
 
 function openVault() {
@@ -25,24 +44,28 @@ function openVault() {
   })
 }
 
-export async function mirrorSaveBundle(bundle: SaveBundle) {
+export async function saveBundleToSlot(bundle: SaveBundle, slot: SaveSlotId) {
   const database = await openVault()
   if (!database) return false
   return new Promise<boolean>((resolve) => {
     const transaction = database.transaction(STORE_NAME, 'readwrite')
-    transaction.objectStore(STORE_NAME).put(bundle, ACTIVE_SLOT)
+    transaction.objectStore(STORE_NAME).put(bundle, slot)
     transaction.oncomplete = () => { database.close(); resolve(true) }
     transaction.onerror = () => { database.close(); resolve(false) }
     transaction.onabort = () => { database.close(); resolve(false) }
   })
 }
 
-export async function loadMirroredSaveBundle() {
+export function mirrorSaveBundle(bundle: SaveBundle) {
+  return saveBundleToSlot(bundle, ACTIVE_SLOT)
+}
+
+export async function loadSaveBundleFromSlot(slot: SaveSlotId) {
   const database = await openVault()
   if (!database) return null
   return new Promise<SaveBundle | null>((resolve) => {
     const transaction = database.transaction(STORE_NAME, 'readonly')
-    const request = transaction.objectStore(STORE_NAME).get(ACTIVE_SLOT)
+    const request = transaction.objectStore(STORE_NAME).get(slot)
     request.onsuccess = () => {
       database.close()
       resolve(isSaveBundle(request.result) ? request.result : null)
@@ -52,6 +75,29 @@ export async function loadMirroredSaveBundle() {
       resolve(null)
     }
   })
+}
+
+export function loadMirroredSaveBundle() {
+  return loadSaveBundleFromSlot(ACTIVE_SLOT)
+}
+
+export async function listNamedSaveSlots() {
+  const summaries = await Promise.all(NAMED_SAVE_SLOTS.map(async (slot) => summarizeSaveSlot(slot, await loadSaveBundleFromSlot(slot.id))))
+  return summaries
+}
+
+export function summarizeSaveSlot(slot: typeof NAMED_SAVE_SLOTS[number], bundle: SaveBundle | null): SaveSlotSummary {
+  if (!bundle) return { id: slot.id, label: slot.label, hasSave: false, exportedAt: null, coachName: null, level: null, developmentWeek: null }
+  const progress = bundle.careerProgress
+  return {
+    id: slot.id,
+    label: slot.label,
+    hasSave: true,
+    exportedAt: bundle.exportedAt,
+    coachName: bundle.profile.name.trim() || 'Técnico sem nome',
+    level: progress ? 1 + Math.floor(progress.xp / 200) : null,
+    developmentWeek: progress?.developmentWeek?.number ?? null,
+  }
 }
 
 export function makeSaveBundle(profile: CoachProfile, catalogSelection: CatalogSelection, careerProgress: CareerProgress | null, operationsPlan: OperationsPlan): SaveBundle {

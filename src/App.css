@@ -401,7 +401,33 @@
 .career-week-footer .action-button { min-height: 36px; margin: 0; padding: 8px 12px; font-size: .55rem; }
 .career-week-footer .action-button:disabled { border-color: #496278; color: #758b9d; background: #11243a; box-shadow: none; cursor: not-allowed; opacity: .65; }
 
+/* Lote 14: slots manuais para preservar trajetórias locais. */
+.save-slots-panel { grid-column: 1 / -1; padding: 0; overflow: hidden; border-color: rgba(95, 150, 196, .5); background: linear-gradient(115deg, rgba(7, 29, 51, .97), rgba(5, 17, 32, .98)); }
+.save-slots-heading { display: flex; align-items: start; justify-content: space-between; gap: 20px; padding: 21px 24px 17px; border-bottom: 1px solid rgba(116, 161, 202, .25); background: radial-gradient(circle at 85% 25%, rgba(36, 106, 160, .2), transparent 30%); }
+.save-slots-heading h2 { margin: 3px 0 0; color: #f3f8fc; font-family: var(--display); font-size: 1.16rem; letter-spacing: .035em; }
+.save-slots-heading p:not(.eyebrow) { max-width: 690px; margin: 8px 0 0; color: #a7beD0; font-size: .69rem; line-height: 1.42; }
+.save-slots-heading .text-button { color: #b9ddfa; font-size: .58rem; }
+.save-slots-heading .text-button:disabled { color: #70889c; cursor: wait; }
+.save-slot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(108, 154, 196, .25); }
+.save-slot { display: grid; min-height: 180px; align-content: start; gap: 15px; padding: 17px; background: rgba(3, 16, 31, .89); }
+.save-slot.has-save { background: linear-gradient(150deg, rgba(9, 43, 71, .96), rgba(4, 18, 34, .96)); }
+.save-slot.is-empty { background: linear-gradient(150deg, rgba(8, 27, 45, .86), rgba(3, 15, 28, .92)); }
+.save-slot-label { display: flex; align-items: center; gap: 9px; }
+.save-slot-label > span { display: grid; place-items: center; width: 25px; height: 25px; border: 1px solid #608ab0; color: #b8d8ed; background: rgba(39, 101, 148, .2); font-family: var(--display); font-size: .67rem; }
+.save-slot.has-save .save-slot-label > span { border-color: #f1c65a; color: #ffe39b; background: rgba(125, 84, 15, .2); }
+.save-slot-label strong { color: #edf5fb; font-family: var(--display); font-size: .72rem; letter-spacing: .06em; }
+.save-slot-details { display: grid; gap: 5px; min-height: 50px; }
+.save-slot-details b { color: #eff6fb; font-family: var(--display); font-size: .72rem; }
+.save-slot.is-empty .save-slot-details b { color: #91aabd; }
+.save-slot-details small { color: #9fb7ca; font-size: .62rem; line-height: 1.3; }
+.save-slot-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: auto; }
+.save-slot-actions .action-button { min-height: 36px; margin: 0; padding: 7px 6px; font-size: .5rem; white-space: nowrap; }
+.save-slot-actions .action-button:disabled { border-color: #425d74; color: #6e879a; background: #102139; box-shadow: none; cursor: not-allowed; }
+.save-slot-note { margin: 0; padding: 13px 18px 15px; border-top: 1px solid rgba(116, 161, 202, .2); font-size: .65rem; }
+
 @media (max-width: 900px) { .career-week-checkpoints { grid-template-columns: 1fr; }.career-week-checkpoints > div { min-height: 67px; }.career-week-head { align-items: flex-start; } }
 @media (max-width: 680px) { .career-week-head { align-items: flex-start; flex-direction: column; gap: 12px; padding: 18px 17px 14px; }.career-week-score { justify-items: start; }.career-week-checkpoints > div { padding: 13px 15px; }.career-week-footer { align-items: stretch; flex-direction: column; padding: 14px 16px; }.career-week-footer .action-button { width: 100%; } }
+@media (max-width: 900px) { .save-slot-grid { grid-template-columns: 1fr; }.save-slot { min-height: 0; grid-template-columns: 1fr auto; align-items: center; }.save-slot-details { grid-column: 1; }.save-slot-actions { grid-column: 2; grid-row: 1 / span 2; min-width: 205px; } }
+@media (max-width: 680px) { .save-slots-heading { align-items: flex-start; flex-direction: column; padding: 18px 17px 14px; }.save-slot { display: grid; padding: 15px; }.save-slot-actions { grid-column: auto; grid-row: auto; min-width: 0; }.save-slot-note { padding-inline: 16px; } }
 @media (prefers-reduced-motion: reduce) { *,*::before,*::after { scroll-behavior:auto !important;animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important; } }.is-reduced-motion *,.is-reduced-motion *::before,.is-reduced-motion *::after { animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important; }
 @media (max-width:900px) { .career-reward-track { grid-template-columns:1fr; }.field-club-overlay { max-width:43%; }.broadcast-control { grid-template-columns:10px 1fr auto; }.broadcast-control .action-button:last-child { grid-column:2 / -1; } } @media (max-width:680px) { .mode-card { min-height:182px; }.field-club-overlay { top:8px;max-width:44%;padding:5px 6px; }.field-club-overlay strong { font-size:.5rem; }.field-club-overlay span { font-size:.4rem; }.field-club-overlay .team-mark { width:23px;height:23px; }.broadcast-control { grid-template-columns:10px 1fr; }.broadcast-control .action-button { grid-column:span 1;width:100%; }.broadcast-control .action-button:last-child { grid-column:1 / -1; }.decision-actions { display:grid;grid-template-columns:1fr 1fr; }.decision-actions .action-button:first-child { grid-column:1 / -1; }.career-reward-track ol { grid-template-columns:repeat(2,1fr); }.save-actions { display:grid;grid-template-columns:1fr; }.save-actions .action-button { width:100%;box-sizing:border-box; } }

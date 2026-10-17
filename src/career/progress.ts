@@ -113,6 +113,10 @@ export function saveCareerProgress(progress: CareerProgress) {
   window.localStorage.setItem(CAREER_PROGRESS_KEY, JSON.stringify(progress))
 }
 
+export function clearCareerProgress() {
+  window.localStorage.removeItem(CAREER_PROGRESS_KEY)
+}
+
 function completionMessage(objective: CareerObjective): CareerInboxMessage {
   const messages: Record<CareerObjective['id'], Omit<CareerInboxMessage, 'id' | 'read'>> = {
     'profile-file': {

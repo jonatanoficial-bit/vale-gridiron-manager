@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type * as React from 'react'
 import { CONTENT_COVERAGE } from './data/content-status'
 import { COACH_AVATARS, findCoachAvatar } from './data/coach-avatars'
@@ -23,9 +23,9 @@ import {
   positionGroups,
 } from './data/roster-2026'
 import type { CareerCheckpointId, CareerObjective, CareerProgress, CatalogSelection, CoachProfile, GameMode, OperationsPlan, Route } from './domain/contracts'
-import { completeCareerDevelopmentWeek, completeCareerObjective, createCareerProgress, loadCareerProgress, normalizeCareerProgress, registerCareerCheckpoint, registerCareerGameSession, saveCareerProgress, unreadCareerMessages } from './career/progress'
+import { clearCareerProgress, completeCareerDevelopmentWeek, completeCareerObjective, createCareerProgress, loadCareerProgress, normalizeCareerProgress, registerCareerCheckpoint, registerCareerGameSession, saveCareerProgress, unreadCareerMessages } from './career/progress'
 import { loadCatalogSelection, loadCoachProfile, saveCatalogSelection, saveCoachProfile } from './lib/persistence'
-import { loadMirroredSaveBundle, makeSaveBundle, mirrorSaveBundle, parseSaveBundle } from './lib/save-vault'
+import { listNamedSaveSlots, loadMirroredSaveBundle, loadSaveBundleFromSlot, makeSaveBundle, mirrorSaveBundle, parseSaveBundle, saveBundleToSlot, type NamedSaveSlotId, type SaveBundle, type SaveSlotSummary } from './lib/save-vault'
 import {
   defensiveIdentityLabel,
   loadOperationsPlan,
@@ -187,6 +187,21 @@ function App() {
     setLastSaved('Arquivo de save exportado')
   }
 
+  function applySaveBundle(bundle: SaveBundle) {
+    const restoredProgress = bundle.careerProgress ? normalizeCareerProgress(bundle.careerProgress) : null
+    const normalizedBundle = { ...bundle, careerProgress: restoredProgress }
+    setProfile(bundle.profile)
+    setCatalogSelection(bundle.catalogSelection)
+    setCareerProgress(restoredProgress)
+    setOperationsPlan(bundle.operationsPlan)
+    saveCoachProfile(bundle.profile)
+    saveCatalogSelection(bundle.catalogSelection)
+    if (restoredProgress) saveCareerProgress(restoredProgress)
+    else clearCareerProgress()
+    saveOperationsPlan(bundle.operationsPlan)
+    return normalizedBundle
+  }
+
   function importSave(file: File) {
     void file.text().then((content) => {
       const bundle = parseSaveBundle(content)
@@ -194,16 +209,7 @@ function App() {
         setLastSaved('Arquivo de save incompatível')
         return
       }
-      setProfile(bundle.profile)
-      setCatalogSelection(bundle.catalogSelection)
-      const restoredProgress = bundle.careerProgress ? normalizeCareerProgress(bundle.careerProgress) : null
-      setCareerProgress(restoredProgress)
-      setOperationsPlan(bundle.operationsPlan)
-      saveCoachProfile(bundle.profile)
-      saveCatalogSelection(bundle.catalogSelection)
-      if (restoredProgress) saveCareerProgress(restoredProgress)
-      saveOperationsPlan(bundle.operationsPlan)
-      void mirrorSaveBundle(bundle)
+      void mirrorSaveBundle(applySaveBundle(bundle))
       setLastSaved('Save importado e espelhado neste navegador')
     })
   }
@@ -214,18 +220,29 @@ function App() {
         setLastSaved('Nenhum espelho de save compatível foi encontrado neste navegador')
         return
       }
-      setProfile(bundle.profile)
-      setCatalogSelection(bundle.catalogSelection)
-      const restoredProgress = bundle.careerProgress ? normalizeCareerProgress(bundle.careerProgress) : null
-      setCareerProgress(restoredProgress)
-      setOperationsPlan(bundle.operationsPlan)
-      saveCoachProfile(bundle.profile)
-      saveCatalogSelection(bundle.catalogSelection)
-      if (restoredProgress) saveCareerProgress(restoredProgress)
-      saveOperationsPlan(bundle.operationsPlan)
+      void mirrorSaveBundle(applySaveBundle(bundle))
       setLastSaved('Espelho de save recuperado neste navegador')
     })
   }
+
+  async function saveNamedSlot(slot: NamedSaveSlotId) {
+    const saved = await saveBundleToSlot(makeSaveBundle(profile, catalogSelection, careerProgress, operationsPlan), slot)
+    setLastSaved(saved ? `Save registrado em ${slot.toUpperCase()}` : 'Não foi possível registrar o slot neste navegador')
+    return saved
+  }
+
+  async function restoreNamedSlot(slot: NamedSaveSlotId) {
+    const bundle = await loadSaveBundleFromSlot(slot)
+    if (!bundle) {
+      setLastSaved('O slot selecionado não possui um save compatível')
+      return false
+    }
+    void mirrorSaveBundle(applySaveBundle(bundle))
+    setLastSaved(`Save de ${slot.toUpperCase()} recuperado neste navegador`)
+    return true
+  }
+
+  const getNamedSaveSlots = useCallback((): Promise<SaveSlotSummary[]> => listNamedSaveSlots(), [])
 
   function handleNavigation(nextRoute: Route) {
     navigate(nextRoute)
@@ -247,11 +264,11 @@ function App() {
         {route === 'jogoUnico' && <SingleGame selectedFranchiseId={catalogSelection.franchiseId} operationsPlan={operationsPlan} onGameFinalized={registerCareerGame} />}
         {route === 'gestao' && <OperationsCenter plan={operationsPlan} onChange={persistOperations} onCareerCheckpoint={recordCareerCheckpoint} onNavigate={handleNavigation} />}
         {route === 'banco' && <ContentDatabase />}
-        {route === 'configuracoes' && <Settings profile={profile} onChange={setProfile} onSave={persistProfile} onExport={exportSave} onImport={importSave} onRestore={restoreMirroredSave} />}
+        {route === 'configuracoes' && <Settings profile={profile} onChange={setProfile} onSave={persistProfile} onExport={exportSave} onImport={importSave} onRestore={restoreMirroredSave} onSaveSlot={saveNamedSlot} onRestoreSlot={restoreNamedSlot} onListSlots={getNamedSaveSlots} />}
       </main>
 
       <footer className="app-footer">
-        <span>LOTES 01–13 · INTEGRAÇÃO EM PROGRESSO</span>
+        <span>LOTES 01–14 · INTEGRAÇÃO EM PROGRESSO</span>
         <span>VALE GRIDIRON MANAGER · protótipo independente</span>
         <span>{CONTENT_COVERAGE.catalogLabel}</span>
       </footer>
@@ -730,8 +747,42 @@ function ContentDatabase() {
   return <section className="route-page" aria-labelledby="database-title"><PageHeading eyebrow="BANCO DE DADOS · LOTES 02–05" title="INVENTÁRIO REAL 2026" copy="Cada registro mostra fonte, data de corte e cobertura por campo. O catálogo não preenche nenhuma ausência com universidades, atletas, técnicos, escudos ou uniformes fictícios." /><div className="coverage-hero panel"><div><p className="eyebrow">SNAPSHOTS REGISTRADOS</p><h2>{CONTENT_COVERAGE.catalogLabel}</h2><p>{CONTENT_COVERAGE.sourceMessage}</p><div className="snapshot-chips">{LEAGUE_SNAPSHOTS_2026.map((snapshot) => <span className={`status-chip ${snapshot.coverageStatus}`} key={snapshot.seasonId}>{snapshot.leagueName} · {snapshot.coverageStatus}</span>)}</div></div><div className="coverage-score"><strong>{CONTENT_COVERAGE.completedFields}<small>/{CONTENT_COVERAGE.totalFields}</small></strong><span>frentes estruturais</span></div></div><div className="coverage-table panel"><div className="table-head"><span>CAMADA</span><span>STATUS</span><span>PRÓXIMA AÇÃO</span></div>{CONTENT_COVERAGE.layers.map((layer) => <div className="table-row" key={layer.name}><strong>{layer.name}</strong><span className={`status-pill ${layer.status}`}>{layer.status === 'pending' ? 'PENDENTE' : layer.status === 'partial' ? 'PARCIAL' : 'PRONTO'}</span><span>{layer.nextAction}</span></div>)}</div><section className="catalog-section panel" aria-labelledby="franchises-title"><div className="section-heading"><div><p className="eyebrow">IDENTIFICAÇÃO VERIFICADA</p><h2 id="franchises-title">FRANQUIAS REGISTRADAS</h2></div><div className="catalog-filter" role="group" aria-label="Filtrar franquias"><button className={leagueFilter === 'all' ? 'is-selected' : ''} onClick={() => setLeagueFilter('all')}>TODAS ({NFL_2026_FRANCHISES.length + UFL_2026_FRANCHISES.length})</button><button className={leagueFilter === 'nfl' ? 'is-selected' : ''} onClick={() => setLeagueFilter('nfl')}>NFL (32)</button><button className={leagueFilter === 'ufl' ? 'is-selected' : ''} onClick={() => setLeagueFilter('ufl')}>UFL (8)</button></div></div><div className="franchise-grid">{franchises.map((franchise) => <article className="franchise-row" key={franchise.id}><div className="franchise-mark">{franchise.name.split(' ').map((part) => part[0]).join('').slice(0, 3)}</div><div><strong>{franchise.name}</strong><span>{franchise.leagueId.toUpperCase()} {franchise.conference ? `· ${franchise.conference} ${franchise.division}` : '· liga única 2026'}</span></div><span className="status-pill ready">ID</span><span className="franchise-source">{franchise.sourceIds.map((sourceId) => sourceById.get(sourceId)?.label.split(' · ')[0]).filter(Boolean).join(' · ')}</span></article>)}</div><p className="catalog-note">Identidades e os escudos registrados dos catálogos NFL/UFL estão disponíveis. Uniformes, fotos, atletas, coaches e contratos continuam cobertos apenas quando cada fonte for importada.</p></section><section className="rules-grid" aria-label="Regras por competição">{RULESETS_2026.map((ruleset) => <article className="ruleset-card panel" key={ruleset.id}><div className="ruleset-top"><span className={`status-pill ${ruleset.coverageStatus}`}>{ruleset.coverageStatus === 'ready' ? 'PRONTO' : ruleset.coverageStatus === 'partial' ? 'PARCIAL' : 'PENDENTE'}</span><small>{ruleset.seasonId}</small></div><h2>{ruleset.displayName}</h2><ul>{ruleset.facts.map((fact) => <li key={fact}>{fact}</li>)}</ul><div className="source-links">{ruleset.sourceIds.map((sourceId) => { const source = sourceById.get(sourceId); return source ? <a key={source.id} href={source.url} target="_blank" rel="noreferrer">FONTE ↗</a> : null })}</div></article>)}</section><section className="coverage-report panel" aria-labelledby="report-title"><div className="section-heading"><div><p className="eyebrow">RELATÓRIO POR CAMPO</p><h2 id="report-title">COBERTURA DO SNAPSHOT</h2></div><span className="cutoff-label">CORTE · 11 OUT 2026</span></div>{reports.map((report) => <article className="report-row" key={report.leagueId}><header><div><strong>{report.label}</strong><span>{report.snapshotId}</span></div><div className="report-sources">{report.sourceIds.map((sourceId) => { const source = sourceById.get(sourceId); return source ? <a key={source.id} href={source.url} target="_blank" rel="noreferrer">{source.label}</a> : null })}</div></header><div className="metric-grid">{report.metrics.map((metric) => { const percent = metric.expected ? Math.round((metric.completed / metric.expected) * 100) : 0; return <div className="metric" key={metric.field}><div><span>{metric.field}</span><strong>{metric.expected ? `${metric.completed}/${metric.expected}` : 'aguardando'}</strong></div><div className="metric-track"><i className={metric.status} style={{ width: `${percent}%` }} /></div></div> })}</div></article>)}</section><section className="catalog-bottom-grid"><article className="calendar-card panel"><p className="eyebrow">CALENDÁRIO IMPORTADO</p><h2>UFL · MARCOS 2026</h2>{CALENDAR_MILESTONES_2026.map((milestone) => <div className="milestone" key={milestone.id}><strong>{milestone.dateLabel}</strong><div><span>{milestone.label}</span><small>{milestone.detail}</small></div></div>)}<p className="muted">A tabela completa de 43 jogos ainda não foi adicionada ao bundle; o relatório mantém essa diferença visível.</p></article><article className="career-card panel"><p className="eyebrow">CENÁRIOS DE CARREIRA</p><h2>CAMINHO SEM ATALHOS</h2>{CAREER_SCENARIOS_2026.map((scenario) => <div className="career-scenario" key={scenario.id}><span className={`status-pill ${scenario.status}`}>{scenario.status === 'partial' ? 'PARCIAL' : 'PENDENTE'}</span><div><strong>{scenario.label}</strong><p>{scenario.requirement}</p></div></div>)}</article></section><div className="data-principles"><article><span>01</span><h2>SEM IDENTIDADES FICTÍCIAS</h2><p>Times, atletas, técnicos, uniformes e logos só entram após o registro correspondente.</p></article><article><span>02</span><h2>SNAPSHOT VERSIONADO</h2><p>Cada entrada fixa liga, temporada, fonte, data de corte e o status de cobertura.</p></article><article><span>03</span><h2>MODELO ≠ DADO OFICIAL</h2><p>Ratings futuros serão parâmetros de simulação, jamais estatística oficial declarada.</p></article></div></section>
 }
 
-function Settings({ profile, onChange, onSave, onExport, onImport, onRestore }: { profile: CoachProfile; onChange: (profile: CoachProfile) => void; onSave: () => void; onExport: () => void; onImport: (file: File) => void; onRestore: () => void }) {
-  return <section className="route-page settings-page" aria-labelledby="settings-title"><PageHeading eyebrow="AJUSTES · LOTE 13" title="PREFERÊNCIAS E SAVE" copy="Perfil, temporada, operações e carreira ficam salvos localmente e são espelhados em IndexedDB quando o navegador oferece suporte. Você também pode levar ou recuperar um arquivo de save." /><div className="settings-grid"><article className="panel"><p className="eyebrow">ACESSIBILIDADE</p><h2>EXPERIÊNCIA VISUAL</h2><label className="toggle-row"><span>Reduzir animações</span><input type="checkbox" checked={profile.reduceMotion} onChange={(event) => onChange({ ...profile, reduceMotion: event.target.checked })} /></label><p className="muted">A preferência respeita o controle do usuário. O sistema também segue as configurações de movimento reduzido do dispositivo.</p></article><article className="panel save-vault-panel"><p className="eyebrow">PERSISTÊNCIA</p><h2>COFRE DE SAVE</h2><p className="muted">Auto-save em localStorage com espelho no IndexedDB. Recupere o último espelho apenas neste navegador; ele substitui as escolhas locais atuais. O arquivo exportado contém somente escolhas e progresso local, sem dados ocultos de atletas ou clubes.</p><div className="save-actions"><button className="action-button primary" onClick={onSave}>SALVAR AGORA <span>✓</span></button><button className="action-button secondary" onClick={onRestore}>RECUPERAR ESPELHO <span>↻</span></button><button className="action-button secondary" onClick={onExport}>EXPORTAR SAVE <span>↓</span></button><label className="action-button secondary import-save-button">IMPORTAR SAVE <span>↑</span><input type="file" accept="application/json" onChange={(event) => { const file = event.currentTarget.files?.[0]; if (file) onImport(file); event.currentTarget.value = '' }} /></label></div></article></div></section>
+function Settings({ profile, onChange, onSave, onExport, onImport, onRestore, onSaveSlot, onRestoreSlot, onListSlots }: { profile: CoachProfile; onChange: (profile: CoachProfile) => void; onSave: () => void; onExport: () => void; onImport: (file: File) => void; onRestore: () => void; onSaveSlot: (slot: NamedSaveSlotId) => Promise<boolean>; onRestoreSlot: (slot: NamedSaveSlotId) => Promise<boolean>; onListSlots: () => Promise<SaveSlotSummary[]> }) {
+  const [slots, setSlots] = useState<SaveSlotSummary[]>([])
+  const [isLoadingSlots, setIsLoadingSlots] = useState(true)
+
+  async function refreshSlots() {
+    setIsLoadingSlots(true)
+    setSlots(await onListSlots())
+    setIsLoadingSlots(false)
+  }
+
+  useEffect(() => {
+    let isCurrent = true
+    void onListSlots().then((nextSlots) => {
+      if (!isCurrent) return
+      setSlots(nextSlots)
+      setIsLoadingSlots(false)
+    })
+    return () => { isCurrent = false }
+  }, [onListSlots])
+
+  async function handleSaveSlot(slot: NamedSaveSlotId) {
+    if (await onSaveSlot(slot)) await refreshSlots()
+  }
+
+  async function handleRestoreSlot(slot: NamedSaveSlotId) {
+    if (await onRestoreSlot(slot)) await refreshSlots()
+  }
+
+  return <section className="route-page settings-page" aria-labelledby="settings-title"><PageHeading eyebrow="AJUSTES · LOTE 14" title="PREFERÊNCIAS E SAVE" copy="Perfil, temporada, operações e carreira ficam salvos localmente. Além do espelho automático, você pode manter três arquivos manuais neste navegador." /><div className="settings-grid"><article className="panel"><p className="eyebrow">ACESSIBILIDADE</p><h2>EXPERIÊNCIA VISUAL</h2><label className="toggle-row"><span>Reduzir animações</span><input type="checkbox" checked={profile.reduceMotion} onChange={(event) => onChange({ ...profile, reduceMotion: event.target.checked })} /></label><p className="muted">A preferência respeita o controle do usuário. O sistema também segue as configurações de movimento reduzido do dispositivo.</p></article><article className="panel save-vault-panel"><p className="eyebrow">PERSISTÊNCIA</p><h2>COFRE DE SAVE</h2><p className="muted">Auto-save em localStorage com espelho no IndexedDB. Recupere o último espelho apenas neste navegador; ele substitui as escolhas locais atuais. O arquivo exportado contém somente escolhas e progresso local, sem dados ocultos de atletas ou clubes.</p><div className="save-actions"><button className="action-button primary" onClick={onSave}>SALVAR AGORA <span>✓</span></button><button className="action-button secondary" onClick={onRestore}>RECUPERAR ESPELHO <span>↻</span></button><button className="action-button secondary" onClick={onExport}>EXPORTAR SAVE <span>↓</span></button><label className="action-button secondary import-save-button">IMPORTAR SAVE <span>↑</span><input type="file" accept="application/json" onChange={(event) => { const file = event.currentTarget.files?.[0]; if (file) onImport(file); event.currentTarget.value = '' }} /></label></div></article><article className="panel save-slots-panel"><div className="save-slots-heading"><div><p className="eyebrow">LOTE 14 · ARQUIVOS LOCAIS</p><h2>TRÊS SLOTS MANUAIS</h2><p>Salvar atualiza somente o arquivo escolhido. Restaurar substitui o perfil, a carreira, a seleção de catálogo e o plano local em uso.</p></div><button className="text-button" onClick={() => void refreshSlots()} disabled={isLoadingSlots}>{isLoadingSlots ? 'LENDO SLOTS…' : 'ATUALIZAR LISTA ↻'}</button></div><div className="save-slot-grid">{slots.map((slot) => <article className={`save-slot ${slot.hasSave ? 'has-save' : 'is-empty'}`} key={slot.id}><div className="save-slot-label"><span>{slot.id.slice(-1)}</span><strong>{slot.label}</strong></div>{slot.hasSave ? <div className="save-slot-details"><b>{slot.coachName}</b><small>NÍVEL {slot.level ?? '—'} · SEMANA {slot.developmentWeek ?? '—'}</small><small>{formatSaveTimestamp(slot.exportedAt)}</small></div> : <div className="save-slot-details"><b>ARQUIVO VAZIO</b><small>Disponível para a sua próxima cópia.</small></div>}<div className="save-slot-actions"><button className="action-button secondary" onClick={() => void handleSaveSlot(slot.id)}>SALVAR AQUI <span>↓</span></button><button className="action-button primary" disabled={!slot.hasSave} onClick={() => void handleRestoreSlot(slot.id)}>RESTAURAR <span>↻</span></button></div></article>)}</div><p className="muted save-slot-note">Os slots ficam apenas neste dispositivo/navegador. Exporte um arquivo JSON para manter uma cópia fora dele.</p></article></div></section>
+}
+
+function formatSaveTimestamp(value: string | null) {
+  if (!value) return 'Data indisponível'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return 'Data indisponível'
+  return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(date)
 }
 
 function RosterDatabase() {

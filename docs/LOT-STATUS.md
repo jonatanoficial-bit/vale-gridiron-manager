@@ -1,5 +1,16 @@
 # Status dos lotes
 
+## Ciclo de produção 14 — slots manuais de save
+
+- Três slots nomeados são gravados no mesmo IndexedDB do espelho ativo.
+- Cada slot mostra técnico, nível, semana de desenvolvimento e data da cópia antes de uma restauração.
+- A restauração normaliza saves de carreira anteriores e também atualiza o espelho de recuperação.
+
+### Limites preservados
+
+- Slots permanecem locais ao navegador/dispositivo; não há login, cloud ou sincronização entre dispositivos.
+- A restauração substitui somente escolhas e progresso do usuário, sem criar conteúdo esportivo ou alterar snapshots do catálogo.
+
 ## Ciclo de produção 13 — carreira semanal e recuperação de save
 
 - Semana de desenvolvimento local conecta treino, scouting e partida tática em três checkpoints persistentes.
