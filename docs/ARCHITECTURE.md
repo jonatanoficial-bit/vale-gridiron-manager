@@ -1,4 +1,4 @@
-# Arquitetura dos Lotes 01–15
+# Arquitetura dos Lotes 01–16
 
 ## Objetivo desta entrega
 
@@ -16,6 +16,7 @@ Esta base implementa o shell navegável para os três modos, contratos iniciais 
 - `src/lib/persistence.ts`: cópia de compatibilidade dos perfis e escolhas em `localStorage`.
 - `src/lib/save-vault.ts`: espelho do save ativo em IndexedDB, três slots manuais locais, leitura por recuperação explícita e contrato do arquivo exportável/importável.
 - `src/sim/autoplay.ts`: recomendação automática, níveis Guiado/Estratégico/Automático e momentos de decisão derivados de `GameState`.
+- `src/sim/debrief.ts`: relatório pós-jogo local, composto de margem, foco e pontos de virada extraídos do `GameState` e do EventLog.
 - `public/`: manifest, service worker progressivo, emblema VALE e campo de referência fornecidos pelo usuário, artes neutras originais em `public/art/` e avatares originais de perfil em `public/avatars/`.
 
 ## Decisões de base

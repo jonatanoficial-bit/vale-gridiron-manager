@@ -4,7 +4,7 @@ import { NFL_2026_FRANCHISES, RIGHTS_ASSET_MANIFEST_2026, RULESETS_2026, UFL_202
 import { BILLS_2026_ROSTER, BILLS_2026_ROSTER_IMPORT, BILLS_2026_STAFF, BILLS_2026_STAFF_CONTRACTS } from './data/roster-2026'
 import App from './App'
 
-describe('Lotes 01 a 15', () => {
+describe('Lotes 01 a 16', () => {
   beforeEach(() => {
     window.location.hash = '#/'
     window.localStorage.clear()
@@ -94,6 +94,15 @@ describe('Lotes 01 a 15', () => {
     expect(screen.getByRole('button', { name: /guiado/i })).toHaveAttribute('aria-pressed', 'true')
     fireEvent.click(screen.getByRole('button', { name: /iniciar partida/i }))
     expect(screen.getByRole('button', { name: /ajuda: guiado/i })).toBeInTheDocument()
+  })
+
+  it('opens the local film-room report after a completed simulation', () => {
+    window.location.hash = '#/jogo-unico'
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: /iniciar partida/i }))
+    fireEvent.click(screen.getByRole('button', { name: /simular até o fim/i }))
+    expect(screen.getByRole('heading', { name: /relatório do técnico/i })).toBeInTheDocument()
+    expect(screen.getByText(/relatório local derivado de eventos do simengine/i)).toBeInTheDocument()
   })
 
   it('persists a football-operations plan and carries it into the deterministic match', () => {

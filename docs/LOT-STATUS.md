@@ -1,5 +1,16 @@
 # Status dos lotes
 
+## Ciclo de produção 16 — sala de análise pós-jogo
+
+- Uma partida finalizada abre um relatório local de técnico com a margem final, até três pontos de virada e um foco para a próxima transmissão.
+- Cada item nasce exclusivamente do `GameState`, EventLog e plano tático local que já produziram a execução; não há coleta ou composição de dados externos.
+- Perdas de posse priorizam uma leitura de proteção da bola; sem elas, a leitura considera a margem da simulação ou a identidade ofensiva escolhida.
+
+### Limites preservados
+
+- O relatório não atribui estatísticas, desempenho, título, vitória, derrota ou narrativa a atletas, clubes ou competições reais.
+- Não altera XP, reputação, contratos, ofertas ou standings. É uma camada de revisão para a transmissão local.
+
 ## Ciclo de produção 15 — assistente tático adaptável
 
 - Jogo Único agora oferece os modos Guiado, Estratégico e Automático antes e durante a transmissão.

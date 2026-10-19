@@ -45,6 +45,7 @@ import {
 } from './operations/plan'
 import { FieldCanvas } from './broadcast/FieldCanvas'
 import { ASSIST_MODE_OPTIONS, assistModeLabel, playLabel, recommendAutoPlay, tacticalDecision, type AssistMode } from './sim/autoplay'
+import { createMatchDebrief } from './sim/debrief'
 import { createGame, resolvePlay, simulateToEnd } from './sim/engine'
 import { projectStats } from './sim/stats'
 import type { GameState, PlayCall } from './sim/types'
@@ -268,7 +269,7 @@ function App() {
       </main>
 
       <footer className="app-footer">
-        <span>LOTES 01–15 · INTEGRAÇÃO EM PROGRESSO</span>
+        <span>LOTES 01–16 · INTEGRAÇÃO EM PROGRESSO</span>
         <span>VALE GRIDIRON MANAGER · protótipo independente</span>
         <span>{CONTENT_COVERAGE.catalogLabel}</span>
       </footer>
@@ -650,6 +651,7 @@ function LiveGame({ state, home, away, assistMode, onAssistModeChange, onPlay, o
   const [autoplay, setAutoplay] = useState(true)
   const [pace, setPace] = useState<'broadcast' | 'quick'>('broadcast')
   const decision = tacticalDecision(state, assistMode)
+  const debrief = state.status === 'final' ? createMatchDebrief(state) : null
 
   useEffect(() => {
     if (!autoplay || state.status === 'final' || decision) return undefined
@@ -663,7 +665,7 @@ function LiveGame({ state, home, away, assistMode, onAssistModeChange, onPlay, o
       <div className="score-core"><span>{state.status === 'final' ? 'FINAL' : `${state.period}º QUARTO · ${formatClock(state.gameClockMs)}`}</span><strong>{state.status === 'final' ? 'PARTIDA ENCERRADA' : `${state.down}ª & ${state.distance} · JARDA ${state.ballSpot}`}</strong><small>POSSE · {offense?.name ?? '—'}</small></div>
       <div className="score-team score-team-home"><b>{state.homeScore}</b><strong>{home.name}</strong><TeamMark franchise={home} /></div>
     </div>
-    <PageHeading eyebrow="TRANSMISSÃO TÁTICA · LOTES 10–12" title={state.status === 'final' ? 'BOX SCORE FINAL' : 'JOGO AO VIVO'} copy="O SimEngine move a transmissão por conta própria e pede sua decisão em cenários de alto impacto. Campo, placar e EventLog vêm de um estado auditável; marcadores seguem neutros até rosters, ratings e uniformes terem cobertura autorizada." />
+    <PageHeading eyebrow="TRANSMISSÃO TÁTICA · LOTES 10–12 + CICLOS 13–16" title={state.status === 'final' ? 'BOX SCORE FINAL' : 'JOGO AO VIVO'} copy="O SimEngine move a transmissão por conta própria e pede sua decisão em cenários de alto impacto. Campo, placar e EventLog vêm de um estado auditável; marcadores seguem neutros até rosters, ratings e uniformes terem cobertura autorizada." />
     <div className="live-game-grid">
       <article className="live-field-panel panel">
         <div className="field-labels"><span>LINHA DE SCRIMMAGE</span><span>PRIMEIRA DESCIDA</span><strong>{autoplay ? 'PILOTO TÁTICO ATIVO' : 'TRANSMISSÃO PAUSADA'}</strong></div>
@@ -685,8 +687,15 @@ function LiveGame({ state, home, away, assistMode, onAssistModeChange, onPlay, o
       </article>
       <aside className="play-by-play panel"><div className="panel-heading"><span className="panel-icon">≋</span><div><p>EVENTLOG</p><h2>PLAY-BY-PLAY</h2></div></div><ol>{visibleEvents.map((event) => <li key={event.id}><span>{event.period}Q · {formatClock(event.clockMs)}</span><strong>{event.text}</strong></li>)}</ol></aside>
     </div>
+    {debrief && <PostGameDebrief debrief={debrief} home={home} away={away} />}
     <section className="box-score panel" aria-label="Projeção de estatísticas derivada do EventLog"><div className="box-score-head"><p className="eyebrow">ESTATÍSTICAS PROJETADAS</p><strong>{away.name} <span>vs</span> {home.name}</strong></div>{[['Primeiras descidas', stats.away.firstDowns, stats.home.firstDowns], ['Jardas aéreas', stats.away.passingYards, stats.home.passingYards], ['Jardas terrestres', stats.away.rushingYards, stats.home.rushingYards], ['Turnovers', stats.away.turnovers, stats.home.turnovers], ['Touchdowns', stats.away.touchdowns, stats.home.touchdowns], ['Field goals', stats.away.fieldGoals, stats.home.fieldGoals]].map(([label, awayValue, homeValue]) => <div className="box-score-row" key={String(label)}><strong>{String(awayValue)}</strong><span>{String(label)}</span><strong>{String(homeValue)}</strong></div>)}<p className="engine-note">Seed: <code>{state.seed}</code> · versão: {state.engineVersion} · cada placar acima é consequência de eventos registrados.</p>{state.status === 'final' && <button className="action-button primary" onClick={onNewGame}>NOVA PARTIDA <span>↻</span></button>}</section>
   </section>
+}
+
+function PostGameDebrief({ debrief, home, away }: { debrief: ReturnType<typeof createMatchDebrief>; home: NonNullable<ReturnType<typeof findFranchise>>; away: NonNullable<ReturnType<typeof findFranchise>> }) {
+  const teamName = (teamId: string | null) => teamId === home.id ? home.name : teamId === away.id ? away.name : 'SISTEMA'
+
+  return <section className="postgame-debrief panel" aria-labelledby="debrief-title"><header><div><p className="eyebrow">LOTE 16 · SALA DE FILME</p><h2 id="debrief-title">RELATÓRIO DO TÉCNICO</h2></div><strong>{debrief.outcome}</strong></header><div className="debrief-grid"><article className="debrief-focus"><span>◈</span><div><p>PRÓXIMO FOCO</p><strong>{debrief.focus.label}</strong><small>{debrief.focus.detail}</small></div></article><article className="debrief-moments"><p>PONTOS DE VIRADA</p>{debrief.moments.length > 0 ? <ol>{debrief.moments.map((event) => <li key={event.id}><span>{event.period}Q · {teamName(event.teamId)}</span><strong>{event.text}</strong></li>)}</ol> : <div className="debrief-empty">Nenhum evento de virada foi registrado nesta execução.</div>}</article></div><footer>{debrief.context}</footer></section>
 }
 
 function BroadcastControl({ state, autoplay, pace, assistMode, decision, onToggle, onPace, onAssistModeChange, onPlay }: { state: GameState; autoplay: boolean; pace: 'broadcast' | 'quick'; assistMode: AssistMode; decision: ReturnType<typeof tacticalDecision>; onToggle: () => void; onPace: () => void; onAssistModeChange: () => void; onPlay: (call: PlayCall) => void }) {

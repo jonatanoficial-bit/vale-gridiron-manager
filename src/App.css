@@ -240,6 +240,23 @@
 .play-by-play li span { color: #89a5bf; font-family: var(--display); font-size: .55rem; letter-spacing: .05em; }
 .play-by-play li strong { color: #e8f0f6; font-size: .72rem; font-weight: 600; line-height: 1.35; }
 .box-score { margin-top: 16px; padding: 20px; }
+.postgame-debrief { margin-top: 16px; overflow: hidden; padding: 0; border-color: rgba(227, 181, 73, .55); background: linear-gradient(110deg, rgba(44, 35, 22, .92), rgba(5, 20, 35, .98) 48%, rgba(10, 39, 64, .96)); }
+.postgame-debrief > header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 21px; border-bottom: 1px solid rgba(230, 196, 115, .23); background: linear-gradient(100deg, rgba(147, 100, 21, .2), transparent 63%); }
+.postgame-debrief h2 { margin: 3px 0 0; color: #fff7dc; font-family: var(--display); font-size: 1rem; letter-spacing: .05em; }
+.postgame-debrief > header > strong { padding: 7px 10px; border: 1px solid rgba(246, 211, 116, .75); color: #ffe7a0; background: rgba(108, 75, 16, .28); font-family: var(--display); font-size: .6rem; letter-spacing: .05em; text-align: center; }
+.debrief-grid { display: grid; grid-template-columns: minmax(220px, .86fr) minmax(0, 1.35fr); gap: 1px; background: rgba(139, 170, 196, .22); }
+.debrief-focus, .debrief-moments { padding: 18px 20px; background: rgba(4, 18, 33, .88); }
+.debrief-focus { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; align-content: start; background: linear-gradient(145deg, rgba(48, 51, 35, .5), rgba(5, 20, 35, .96)); }
+.debrief-focus > span { display: grid; place-items: center; width: 28px; height: 28px; border: 1px solid #e7bf5c; color: #ffe39b; background: rgba(142, 95, 15, .22); font-family: var(--display); }
+.debrief-focus p, .debrief-moments > p { margin: 0; color: #8fb3d1; font-family: var(--display); font-size: .53rem; letter-spacing: .1em; }
+.debrief-focus strong { display: block; margin-top: 4px; color: #f8edc8; font-family: var(--display); font-size: .75rem; letter-spacing: .04em; }
+.debrief-focus small { display: block; margin-top: 7px; color: #b8cbd9; font-size: .65rem; line-height: 1.42; }
+.debrief-moments ol { display: grid; gap: 7px; padding: 0; margin: 9px 0 0; list-style: none; }
+.debrief-moments li { display: grid; gap: 3px; padding: 8px 10px; border-left: 2px solid #608fb6; background: rgba(31, 76, 111, .2); }
+.debrief-moments li span { color: #a8c9e5; font-family: var(--display); font-size: .5rem; letter-spacing: .06em; }
+.debrief-moments li strong { color: #e8f2fb; font-size: .65rem; line-height: 1.3; }
+.debrief-empty { margin-top: 10px; padding: 10px; color: #9fb7c9; background: rgba(21, 50, 74, .38); font-size: .65rem; }
+.postgame-debrief > footer { padding: 11px 20px; border-top: 1px solid rgba(121, 160, 195, .2); color: #9eb9ce; background: rgba(3, 14, 27, .62); font-size: .61rem; line-height: 1.4; }
 .box-score-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; padding-bottom: 11px; border-bottom: 1px solid rgba(134, 173, 207, .23); }
 .box-score-head p { margin: 0; }
 .box-score-head strong { color: #f2f7fa; font-family: var(--display); font-size: .86rem; text-align: right; }
@@ -445,5 +462,6 @@
 @media (max-width: 680px) { .assist-mode-selector { gap: 13px; padding: 17px; }.assist-mode-options { grid-template-columns: 1fr; }.assist-mode-options button { min-height: 61px; }.live-field-panel .broadcast-control { grid-template-columns: 10px minmax(0, 1fr); }.broadcast-control .action-button { grid-column: 2; width: 100%; }.broadcast-control .action-button:last-child { grid-column: 1 / -1; } }
 @media (max-width: 900px) { .save-slot-grid { grid-template-columns: 1fr; }.save-slot { min-height: 0; grid-template-columns: 1fr auto; align-items: center; }.save-slot-details { grid-column: 1; }.save-slot-actions { grid-column: 2; grid-row: 1 / span 2; min-width: 205px; } }
 @media (max-width: 680px) { .save-slots-heading { align-items: flex-start; flex-direction: column; padding: 18px 17px 14px; }.save-slot { display: grid; padding: 15px; }.save-slot-actions { grid-column: auto; grid-row: auto; min-width: 0; }.save-slot-note { padding-inline: 16px; } }
+@media (max-width: 680px) { .postgame-debrief > header { align-items: flex-start; flex-direction: column; padding: 17px; }.debrief-grid { grid-template-columns: 1fr; }.debrief-focus, .debrief-moments { padding: 16px 17px; }.postgame-debrief > footer { padding: 11px 17px; } }
 @media (prefers-reduced-motion: reduce) { *,*::before,*::after { scroll-behavior:auto !important;animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important; } }.is-reduced-motion *,.is-reduced-motion *::before,.is-reduced-motion *::after { animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important; }
 @media (max-width:900px) { .career-reward-track { grid-template-columns:1fr; }.field-club-overlay { max-width:43%; }.broadcast-control { grid-template-columns:10px 1fr auto; }.broadcast-control .action-button:last-child { grid-column:2 / -1; } } @media (max-width:680px) { .mode-card { min-height:182px; }.field-club-overlay { top:8px;max-width:44%;padding:5px 6px; }.field-club-overlay strong { font-size:.5rem; }.field-club-overlay span { font-size:.4rem; }.field-club-overlay .team-mark { width:23px;height:23px; }.broadcast-control { grid-template-columns:10px 1fr; }.broadcast-control .action-button { grid-column:span 1;width:100%; }.broadcast-control .action-button:last-child { grid-column:1 / -1; }.decision-actions { display:grid;grid-template-columns:1fr 1fr; }.decision-actions .action-button:first-child { grid-column:1 / -1; }.career-reward-track ol { grid-template-columns:repeat(2,1fr); }.save-actions { display:grid;grid-template-columns:1fr; }.save-actions .action-button { width:100%;box-sizing:border-box; } }
