@@ -1,5 +1,16 @@
 # Status dos lotes
 
+## Ciclo de produção 15 — assistente tático adaptável
+
+- Jogo Único agora oferece os modos Guiado, Estratégico e Automático antes e durante a transmissão.
+- Guiado pausa também em terceiras descidas relevantes e explica o contexto; Estratégico preserva as pausas de quarta descida/red zone; Automático deixa o piloto seguir sem interrupção.
+- O nível escolhido altera somente a interface de decisão. Seed, regras do SimEngine, EventLog e projeções continuam determinísticos.
+
+### Limites preservados
+
+- As leituras são regras transparentes do protótipo, não scouting, ratings, recomendações de uma liga ou desempenho real de atletas.
+- O modo automático não cria resultados oficiais, histórico de clubes, ranking ou progresso comprado.
+
 ## Ciclo de produção 14 — slots manuais de save
 
 - Três slots nomeados são gravados no mesmo IndexedDB do espelho ativo.

@@ -4,7 +4,7 @@ import { NFL_2026_FRANCHISES, RIGHTS_ASSET_MANIFEST_2026, RULESETS_2026, UFL_202
 import { BILLS_2026_ROSTER, BILLS_2026_ROSTER_IMPORT, BILLS_2026_STAFF, BILLS_2026_STAFF_CONTRACTS } from './data/roster-2026'
 import App from './App'
 
-describe('Lotes 01 a 09', () => {
+describe('Lotes 01 a 15', () => {
   beforeEach(() => {
     window.location.hash = '#/'
     window.localStorage.clear()
@@ -84,6 +84,16 @@ describe('Lotes 01 a 09', () => {
     fireEvent.click(screen.getByRole('button', { name: /passe curto/i }))
     expect(screen.getByText(/play-by-play/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /aplicar ajuda/i })).toBeEnabled()
+  })
+
+  it('lets the user choose guided assistance before a match', () => {
+    window.location.hash = '#/jogo-unico'
+    render(<App />)
+    expect(screen.getByRole('button', { name: /estratégico/i })).toHaveAttribute('aria-pressed', 'true')
+    fireEvent.click(screen.getByRole('button', { name: /guiado/i }))
+    expect(screen.getByRole('button', { name: /guiado/i })).toHaveAttribute('aria-pressed', 'true')
+    fireEvent.click(screen.getByRole('button', { name: /iniciar partida/i }))
+    expect(screen.getByRole('button', { name: /ajuda: guiado/i })).toBeInTheDocument()
   })
 
   it('persists a football-operations plan and carries it into the deterministic match', () => {

@@ -425,8 +425,24 @@
 .save-slot-actions .action-button:disabled { border-color: #425d74; color: #6e879a; background: #102139; box-shadow: none; cursor: not-allowed; }
 .save-slot-note { margin: 0; padding: 13px 18px 15px; border-top: 1px solid rgba(116, 161, 202, .2); font-size: .65rem; }
 
+/* Lote 15: níveis de ajuda para que a transmissão seja acessível a novos técnicos. */
+.assist-mode-selector { display: grid; grid-template-columns: minmax(210px, .74fr) minmax(0, 1.5fr); gap: 18px; align-items: center; padding: 19px 22px; border-top: 1px solid rgba(116, 171, 215, .27); background: linear-gradient(110deg, rgba(7, 39, 66, .94), rgba(3, 17, 33, .98)); }
+.assist-mode-selector h2 { margin: 3px 0 0; color: #f4f8fc; font-family: var(--display); font-size: 1rem; letter-spacing: .04em; }
+.assist-mode-selector p:not(.eyebrow) { margin: 7px 0 0; color: #a5c0d4; font-size: .67rem; line-height: 1.42; }
+.assist-mode-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+.assist-mode-options button { display: grid; gap: 5px; min-height: 79px; padding: 11px; border: 1px solid #426e94; color: #a8c5da; background: linear-gradient(145deg, rgba(9, 34, 57, .94), rgba(5, 18, 34, .98)); text-align: left; cursor: pointer; transition: border-color .18s ease, background .18s ease, transform .18s ease; }
+.assist-mode-options button:hover { transform: translateY(-2px); border-color: #8bc9fa; }
+.assist-mode-options button.is-active { border-color: #f2c85a; color: #fff2c4; background: linear-gradient(145deg, rgba(105, 66, 18, .62), rgba(10, 33, 52, .98)); box-shadow: inset 0 0 0 1px rgba(255, 230, 142, .13), 0 0 16px rgba(225, 166, 39, .13); }
+.assist-mode-options strong { font-family: var(--display); font-size: .65rem; letter-spacing: .05em; }
+.assist-mode-options small { color: #9db7ca; font-size: .59rem; line-height: 1.28; }
+.assist-mode-options button.is-active small { color: #e6d4a6; }
+.live-field-panel .broadcast-control { grid-template-columns: 10px minmax(0, 1fr) auto auto auto; }
+.coach-assist em { display: block; margin-top: 5px; color: #77c7ff; font-size: .57rem; font-style: normal; line-height: 1.3; }
+
 @media (max-width: 900px) { .career-week-checkpoints { grid-template-columns: 1fr; }.career-week-checkpoints > div { min-height: 67px; }.career-week-head { align-items: flex-start; } }
+@media (max-width: 900px) { .assist-mode-selector { grid-template-columns: 1fr; }.live-field-panel .broadcast-control { grid-template-columns: 10px minmax(0, 1fr) auto auto; }.broadcast-control .action-button:last-child { grid-column: 2 / -1; } }
 @media (max-width: 680px) { .career-week-head { align-items: flex-start; flex-direction: column; gap: 12px; padding: 18px 17px 14px; }.career-week-score { justify-items: start; }.career-week-checkpoints > div { padding: 13px 15px; }.career-week-footer { align-items: stretch; flex-direction: column; padding: 14px 16px; }.career-week-footer .action-button { width: 100%; } }
+@media (max-width: 680px) { .assist-mode-selector { gap: 13px; padding: 17px; }.assist-mode-options { grid-template-columns: 1fr; }.assist-mode-options button { min-height: 61px; }.live-field-panel .broadcast-control { grid-template-columns: 10px minmax(0, 1fr); }.broadcast-control .action-button { grid-column: 2; width: 100%; }.broadcast-control .action-button:last-child { grid-column: 1 / -1; } }
 @media (max-width: 900px) { .save-slot-grid { grid-template-columns: 1fr; }.save-slot { min-height: 0; grid-template-columns: 1fr auto; align-items: center; }.save-slot-details { grid-column: 1; }.save-slot-actions { grid-column: 2; grid-row: 1 / span 2; min-width: 205px; } }
 @media (max-width: 680px) { .save-slots-heading { align-items: flex-start; flex-direction: column; padding: 18px 17px 14px; }.save-slot { display: grid; padding: 15px; }.save-slot-actions { grid-column: auto; grid-row: auto; min-width: 0; }.save-slot-note { padding-inline: 16px; } }
 @media (prefers-reduced-motion: reduce) { *,*::before,*::after { scroll-behavior:auto !important;animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important; } }.is-reduced-motion *,.is-reduced-motion *::before,.is-reduced-motion *::after { animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important; }

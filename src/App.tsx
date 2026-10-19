@@ -44,7 +44,7 @@ import {
   trainingFocusLabel,
 } from './operations/plan'
 import { FieldCanvas } from './broadcast/FieldCanvas'
-import { playLabel, recommendAutoPlay, tacticalDecision } from './sim/autoplay'
+import { ASSIST_MODE_OPTIONS, assistModeLabel, playLabel, recommendAutoPlay, tacticalDecision, type AssistMode } from './sim/autoplay'
 import { createGame, resolvePlay, simulateToEnd } from './sim/engine'
 import { projectStats } from './sim/stats'
 import type { GameState, PlayCall } from './sim/types'
@@ -268,7 +268,7 @@ function App() {
       </main>
 
       <footer className="app-footer">
-        <span>LOTES 01–14 · INTEGRAÇÃO EM PROGRESSO</span>
+        <span>LOTES 01–15 · INTEGRAÇÃO EM PROGRESSO</span>
         <span>VALE GRIDIRON MANAGER · protótipo independente</span>
         <span>{CONTENT_COVERAGE.catalogLabel}</span>
       </footer>
@@ -591,6 +591,7 @@ function SingleGame({ selectedFranchiseId, operationsPlan, onGameFinalized }: { 
   const [awayId, setAwayId] = useState(initialAway)
   const [gameState, setGameState] = useState<GameState | null>(null)
   const [finalReported, setFinalReported] = useState(false)
+  const [assistMode, setAssistMode] = useState<AssistMode>('strategic')
   const home = findFranchise(homeId) ?? clubs[0]
   const away = findFranchise(awayId) ?? clubs[1]
 
@@ -631,10 +632,10 @@ function SingleGame({ selectedFranchiseId, operationsPlan, onGameFinalized }: { 
   }
 
   if (gameState) {
-    return <LiveGame state={gameState} home={home} away={away} onPlay={(call) => commitGame(resolvePlay(gameState, call))} onSimulate={() => commitGame(simulateToEnd(gameState))} onNewGame={() => { setGameState(null); setFinalReported(false) }} />
+    return <LiveGame state={gameState} home={home} away={away} assistMode={assistMode} onAssistModeChange={setAssistMode} onPlay={(call) => commitGame(resolvePlay(gameState, call))} onSimulate={() => commitGame(simulateToEnd(gameState))} onNewGame={() => { setGameState(null); setFinalReported(false) }} />
   }
 
-  return <section className="route-page game-setup-page" aria-labelledby="single-title"><PageHeading eyebrow="JOGO ÚNICO · TRANSMISSÃO ASSISTIDA" title="PREPARE A PARTIDA" copy="O motor determinístico executa posses, relógio, placar e EventLog. A transmissão progride automaticamente, mas pausa nas decisões de risco para você escolher a chamada. As equipes e escudos são os registros reais do catálogo; sem rosters e ratings completos, os marcadores em campo seguem neutros." /><div className="single-game-board panel"><div className="matchup-row"><MatchSlot side="MANDANTE" franchise={home} value={homeId} onChange={selectHome} clubs={clubs} /><div className="versus">VS<small>PRÉ-JOGO · LOTE 10</small></div><MatchSlot side="VISITANTE" franchise={away} value={awayId} onChange={selectAway} clubs={clubs} /></div><div className="field-preview field-preview-cinematic" aria-hidden="true"><div className="yard-lines" /><span>CAMPO NEUTRO DE TRANSMISSÃO</span><small>ESTÁDIO ORIGINAL · ESCUDOS SOBREPOSTOS PELO HUD</small></div><div className="game-options"><div><span>REGRAS</span><strong>{home.leagueId === away.leagueId ? home.leagueId.toUpperCase() + ' 2026' : 'PROTOCOLO NEUTRO'}</strong></div><div><span>TRANSMISSÃO</span><strong>Auto + decisões críticas</strong></div><div><span>DURAÇÃO</span><strong>4 × 15 minutos</strong></div><button className="action-button primary" onClick={startGame}>INICIAR PARTIDA <span>›</span></button></div></div><div className="content-callout"><span>✓</span><div><strong>Campo cinematográfico e transmissão assistida ativos.</strong><p>A imagem é uma arte original neutra. O Canvas usa o estado imutável do SimEngine, e os escudos publicados aparecem somente no HUD dos clubes escolhidos.</p></div></div></section>
+  return <section className="route-page game-setup-page" aria-labelledby="single-title"><PageHeading eyebrow="JOGO ÚNICO · TRANSMISSÃO ASSISTIDA" title="PREPARE A PARTIDA" copy="O motor determinístico executa posses, relógio, placar e EventLog. Escolha quanto apoio deseja receber: explicações para aprender, pausas apenas nas decisões de risco ou piloto totalmente automático. As equipes e escudos são os registros reais do catálogo; sem rosters e ratings completos, os marcadores em campo seguem neutros." /><div className="single-game-board panel"><div className="matchup-row"><MatchSlot side="MANDANTE" franchise={home} value={homeId} onChange={selectHome} clubs={clubs} /><div className="versus">VS<small>PRÉ-JOGO · LOTE 15</small></div><MatchSlot side="VISITANTE" franchise={away} value={awayId} onChange={selectAway} clubs={clubs} /></div><div className="field-preview field-preview-cinematic" aria-hidden="true"><div className="yard-lines" /><span>CAMPO NEUTRO DE TRANSMISSÃO</span><small>ESTÁDIO ORIGINAL · ESCUDOS SOBREPOSTOS PELO HUD</small></div><div className="game-options"><div><span>REGRAS</span><strong>{home.leagueId === away.leagueId ? home.leagueId.toUpperCase() + ' 2026' : 'PROTOCOLO NEUTRO'}</strong></div><div><span>TRANSMISSÃO</span><strong>Auto + decisões táticas</strong></div><div><span>DURAÇÃO</span><strong>4 × 15 minutos</strong></div><button className="action-button primary" onClick={startGame}>INICIAR PARTIDA <span>›</span></button></div><section className="assist-mode-selector" aria-labelledby="assist-mode-title"><div><p className="eyebrow">LOTE 15 · CONTROLE DO TÉCNICO</p><h2 id="assist-mode-title">NÍVEL DE ASSISTÊNCIA</h2><p>O modo altera apenas quando a transmissão pausa; o SimEngine e a seed permanecem reproduzíveis.</p></div><div className="assist-mode-options" role="group" aria-label="Nível de assistência tática">{ASSIST_MODE_OPTIONS.map((option) => <button key={option.id} type="button" className={assistMode === option.id ? 'is-active' : ''} aria-pressed={assistMode === option.id} onClick={() => setAssistMode(option.id)}><strong>{option.label}</strong><small>{option.detail}</small></button>)}</div></section></div><div className="content-callout"><span>✓</span><div><strong>Campo cinematográfico e transmissão assistida ativos.</strong><p>A imagem é uma arte original neutra. O Canvas usa o estado imutável do SimEngine, e os escudos publicados aparecem somente no HUD dos clubes escolhidos.</p></div></div></section>
 }
 
 function formatClock(clockMs: number) {
@@ -642,13 +643,13 @@ function formatClock(clockMs: number) {
   return `${Math.floor(totalSeconds / 60)}:${String(totalSeconds % 60).padStart(2, '0')}`
 }
 
-function LiveGame({ state, home, away, onPlay, onSimulate, onNewGame }: { state: GameState; home: NonNullable<ReturnType<typeof findFranchise>>; away: NonNullable<ReturnType<typeof findFranchise>>; onPlay: (call: PlayCall) => void; onSimulate: () => void; onNewGame: () => void }) {
+function LiveGame({ state, home, away, assistMode, onAssistModeChange, onPlay, onSimulate, onNewGame }: { state: GameState; home: NonNullable<ReturnType<typeof findFranchise>>; away: NonNullable<ReturnType<typeof findFranchise>>; assistMode: AssistMode; onAssistModeChange: (mode: AssistMode) => void; onPlay: (call: PlayCall) => void; onSimulate: () => void; onNewGame: () => void }) {
   const stats = projectStats(state)
   const visibleEvents = [...state.events].slice(-8).reverse()
   const offense = findFranchise(state.offenseId)
   const [autoplay, setAutoplay] = useState(true)
   const [pace, setPace] = useState<'broadcast' | 'quick'>('broadcast')
-  const decision = tacticalDecision(state)
+  const decision = tacticalDecision(state, assistMode)
 
   useEffect(() => {
     if (!autoplay || state.status === 'final' || decision) return undefined
@@ -672,8 +673,8 @@ function LiveGame({ state, home, away, onPlay, onSimulate, onNewGame }: { state:
           <FieldCanvas state={state} />
           <div className="broadcast-atmosphere" aria-hidden="true"><span>LIVE</span><i /></div>
         </div>
-        <BroadcastControl state={state} autoplay={autoplay} pace={pace} decision={decision} onToggle={() => setAutoplay((current) => !current)} onPace={() => setPace((current) => current === 'broadcast' ? 'quick' : 'broadcast')} onPlay={onPlay} />
-        <CoachAssist state={state} onPlay={onPlay} />
+        <BroadcastControl state={state} autoplay={autoplay} pace={pace} assistMode={assistMode} decision={decision} onToggle={() => setAutoplay((current) => !current)} onPace={() => setPace((current) => current === 'broadcast' ? 'quick' : 'broadcast')} onAssistModeChange={() => onAssistModeChange(ASSIST_MODE_OPTIONS[(ASSIST_MODE_OPTIONS.findIndex((option) => option.id === assistMode) + 1) % ASSIST_MODE_OPTIONS.length].id)} onPlay={onPlay} />
+        <CoachAssist state={state} assistMode={assistMode} onPlay={onPlay} />
         <div className="live-controls">
           <button className="action-button secondary" onClick={() => onPlay('short-pass')} disabled={state.status === 'final'}>PASSE CURTO</button>
           <button className="action-button secondary" onClick={() => onPlay('rush')} disabled={state.status === 'final'}>CORRIDA</button>
@@ -688,15 +689,15 @@ function LiveGame({ state, home, away, onPlay, onSimulate, onNewGame }: { state:
   </section>
 }
 
-function BroadcastControl({ state, autoplay, pace, decision, onToggle, onPace, onPlay }: { state: GameState; autoplay: boolean; pace: 'broadcast' | 'quick'; decision: ReturnType<typeof tacticalDecision>; onToggle: () => void; onPace: () => void; onPlay: (call: PlayCall) => void }) {
+function BroadcastControl({ state, autoplay, pace, assistMode, decision, onToggle, onPace, onAssistModeChange, onPlay }: { state: GameState; autoplay: boolean; pace: 'broadcast' | 'quick'; assistMode: AssistMode; decision: ReturnType<typeof tacticalDecision>; onToggle: () => void; onPace: () => void; onAssistModeChange: () => void; onPlay: (call: PlayCall) => void }) {
   if (state.status === 'final') return <section className="broadcast-control is-final"><span>✓</span><div><strong>TRANSMISSÃO CONCLUÍDA</strong><small>O relatório final preserva a seed e todos os eventos gerados.</small></div></section>
 
-  if (decision) return <section className="broadcast-decision" aria-live="assertive"><div className="decision-title"><span>!</span><div><p>AUTOMÁTICO PAUSADO · SUA DECISÃO</p><strong>{decision.title}</strong><small>{decision.detail}</small></div></div><div className="decision-actions"><button className="action-button primary" onClick={() => onPlay(decision.recommended)}>SEGUIR AJUDA · {playLabel(decision.recommended)}</button>{decision.alternatives.filter((call, index, calls) => call !== decision.recommended && calls.indexOf(call) === index).map((call) => <button key={call} className="action-button secondary" onClick={() => onPlay(call)}>{playLabel(call)}</button>)}</div></section>
+  if (decision) return <section className="broadcast-decision" aria-live="assertive"><div className="decision-title"><span>!</span><div><p>{assistModeLabel(assistMode)} · PAUSA TÁTICA</p><strong>{decision.title}</strong><small>{decision.detail}</small></div></div><div className="decision-actions"><button className="action-button primary" onClick={() => onPlay(decision.recommended)}>SEGUIR AJUDA · {playLabel(decision.recommended)}</button>{decision.alternatives.filter((call, index, calls) => call !== decision.recommended && calls.indexOf(call) === index).map((call) => <button key={call} className="action-button secondary" onClick={() => onPlay(call)}>{playLabel(call)}</button>)}</div></section>
 
-  return <section className="broadcast-control"><span className="broadcast-pulse" /><div><strong>{autoplay ? 'PILOTO TÁTICO EM CAMPO' : 'TRANSMISSÃO PAUSADA'}</strong><small>{autoplay ? `Próxima chamada em ${pace === 'quick' ? 'ritmo rápido' : 'ritmo de transmissão'}.` : 'Use as chamadas abaixo ou retome o piloto.'}</small></div><button className="action-button secondary" onClick={onPace}>RITMO: {pace === 'broadcast' ? 'TV' : 'RÁPIDO'}</button><button className="action-button primary" onClick={onToggle}>{autoplay ? 'PAUSAR PILOTO' : 'RETOMAR PILOTO'}</button></section>
+  return <section className="broadcast-control"><span className="broadcast-pulse" /><div><strong>{autoplay ? 'PILOTO TÁTICO EM CAMPO' : 'TRANSMISSÃO PAUSADA'}</strong><small>{autoplay ? `${assistModeLabel(assistMode)} · próxima chamada em ${pace === 'quick' ? 'ritmo rápido' : 'ritmo de transmissão'}.` : 'Use as chamadas abaixo ou retome o piloto.'}</small></div><button className="action-button secondary" onClick={onAssistModeChange}>AJUDA: {assistModeLabel(assistMode)}</button><button className="action-button secondary" onClick={onPace}>RITMO: {pace === 'broadcast' ? 'TV' : 'RÁPIDO'}</button><button className="action-button primary" onClick={onToggle}>{autoplay ? 'PAUSAR PILOTO' : 'RETOMAR PILOTO'}</button></section>
 }
 
-function CoachAssist({ state, onPlay }: { state: GameState; onPlay: (call: PlayCall) => void }) {
+function CoachAssist({ state, assistMode, onPlay }: { state: GameState; assistMode: AssistMode; onPlay: (call: PlayCall) => void }) {
   const recommendation = state.status === 'final'
     ? { call: 'rush' as PlayCall, label: 'PARTIDA ENCERRADA', reason: 'Revise o box score e inicie uma nova partida quando quiser testar outro plano.' }
     : state.down === 4 && state.ballSpot >= 70
@@ -707,7 +708,13 @@ function CoachAssist({ state, onPlay }: { state: GameState; onPlay: (call: PlayC
           ? { call: 'short-pass' as PlayCall, label: 'PASSE CURTO', reason: 'Poucas jardas: uma chamada curta prioriza manter a campanha viva.' }
           : { call: 'rush' as PlayCall, label: 'CORRIDA CONTROLADA', reason: 'Leia a defesa primeiro. A corrida dá uma referência simples antes de arriscar uma jogada longa.' }
 
-  return <section className="coach-assist" aria-label="Ajuda tática para a jogada atual"><span>✦</span><div><p>ASSISTENTE DO TÉCNICO</p><strong>{recommendation.label}</strong><small>{recommendation.reason}</small></div><button className="action-button secondary" disabled={state.status === 'final'} onClick={() => onPlay(recommendation.call)}>APLICAR AJUDA <span>›</span></button></section>
+  const learningNote = assistMode === 'guided'
+    ? 'Modo guiado: as pausas também explicam o contexto da descida.'
+    : assistMode === 'strategic'
+      ? 'Modo estratégico: a transmissão chama você só em pontos de risco.'
+      : 'Modo automático: aplique esta leitura manualmente se quiser intervir.'
+
+  return <section className="coach-assist" aria-label="Ajuda tática para a jogada atual"><span>✦</span><div><p>ASSISTENTE DO TÉCNICO · {assistModeLabel(assistMode)}</p><strong>{recommendation.label}</strong><small>{recommendation.reason}</small><em>{learningNote}</em></div><button className="action-button secondary" disabled={state.status === 'final'} onClick={() => onPlay(recommendation.call)}>APLICAR AJUDA <span>›</span></button></section>
 }
 
 function TeamMark({ franchise }: { franchise: NonNullable<ReturnType<typeof findFranchise>> }) {
